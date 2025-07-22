@@ -30,6 +30,20 @@ jobs:
         override: true
         components: rustfmt, clippy
 
+    - name: Install Protocol Buffers Compiler
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y protobuf-compiler
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install npm dependencies
+      run: npm install
+      working-directory: ./backend
+
     - name: Cache dependencies
       uses: actions/cache@v3
       with:
