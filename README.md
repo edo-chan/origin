@@ -11,6 +11,7 @@ This template provides a starting point for building full-stack applications wit
 - Rust backend with gRPC API
 - Next.js frontend with TypeScript
 - PostgreSQL database
+- Redis for caching and data storage
 - Envoy proxy for HTTP/gRPC translation
 - Docker for containerization
 - Terraform for infrastructure provisioning
@@ -53,6 +54,7 @@ This template provides a starting point for building full-stack applications wit
 - Docker
 - Envoy Proxy
 - PostgreSQL
+- Redis
 - Terraform
 - Tilt
 
@@ -85,12 +87,13 @@ This template provides a starting point for building full-stack applications wit
    - Backend gRPC: localhost:50051
    - Envoy Proxy (HTTP to gRPC): http://localhost:8080
    - PostgreSQL: localhost:5432
+   - Redis: localhost:6379
 
 ### Manual Setup
 
-1. Start the PostgreSQL database:
+1. Start the PostgreSQL database and Redis:
    ```bash
-   docker-compose up -d postgres
+   docker-compose up -d postgres redis
    ```
 
 2. Build and run the backend:

@@ -5,7 +5,8 @@ docker_compose('./docker-compose.yml')
 
 # Define resources for each service
 dc_resource('postgres', labels=["database"])
-dc_resource('backend', labels=["backend"], resource_deps=['postgres'])
+dc_resource('redis', labels=["database"])
+dc_resource('backend', labels=["backend"], resource_deps=['postgres', 'redis'])
 dc_resource('envoy', labels=["proxy"], resource_deps=['backend'])
 dc_resource('frontend', labels=["frontend"], resource_deps=['envoy'])
 
@@ -31,4 +32,5 @@ Frontend: http://localhost:3000
 Backend gRPC: localhost:50051
 Envoy Proxy (HTTP to gRPC): http://localhost:8080
 Postgres: localhost:5432
+Redis: localhost:6379
 """)
