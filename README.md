@@ -2,7 +2,7 @@
 
 A full-stack application template for building modern web applications with a Rust backend and Next.js frontend.
 
-![Rust Backend CI](https://github.com/edo-chan/origin/actions/workflows/rust.yml/badge.svg)
+![Rust Backend CI](https://github.com/edo-chan/origin/actions/workflows/rust.yml/badge.svg?branch=main)
 
 ## Overview
 
