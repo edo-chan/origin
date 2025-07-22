@@ -2,6 +2,22 @@
 
 A template repository for a monolithic application using modern technologies.
 
+## Table of Contents
+
+- [Technologies](#technologies)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Local Development](#local-development)
+  - [Development with Tilt](#development-with-tilt)
+  - [Development Without Docker](#development-without-docker)
+- [Deployment](#deployment)
+- [Features](#features)
+- [Testing](#testing)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Technologies
 
 - **Frontend**:
@@ -190,6 +206,61 @@ TypeScript interfaces are automatically generated from the Protocol Buffer defin
 - Types are generated when the backend is built (via `build.rs`)
 - The frontend imports these types directly from the backend directory
 - The generation uses the `protoc-gen-ts_proto` plugin for optimal TypeScript output
+
+## Testing
+
+### Backend Tests
+
+To run the backend tests:
+
+```bash
+cd backend
+cargo test
+```
+
+### Frontend Tests
+
+To run the frontend tests:
+
+```bash
+cd frontend
+npm test
+```
+
+For frontend component tests:
+
+```bash
+cd frontend
+npm run test:components
+```
+
+For end-to-end tests:
+
+```bash
+cd frontend
+npm run test:e2e
+```
+
+## Configuration
+
+### Environment Variables
+
+The application uses environment variables for configuration. You can set these in a `.env` file in the root directory or in your deployment environment.
+
+#### Backend Environment Variables
+
+- `DATABASE_URL`: PostgreSQL connection string (default: `postgres://postgres:postgres@localhost:5432/template`)
+- `RUST_LOG`: Logging level (default: `info`)
+- `PORT`: gRPC server port (default: `50051`)
+
+#### Frontend Environment Variables
+
+- `NEXT_PUBLIC_API_URL`: URL for the backend API (default: `http://localhost:8080`)
+- `PORT`: Frontend server port (default: `3000`)
+
+### Docker Compose Configuration
+
+The `docker-compose.yml` file contains configuration for all services. You can modify this file to change ports, environment variables, and other settings.
 
 ## Contributing
 
