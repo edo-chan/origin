@@ -1,0 +1,28 @@
+{
+  "name": "template-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@vanilla-extract/css": "^1.14.0",
+    "@vanilla-extract/next-plugin": "^2.3.2",
+    "jotai": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.57",
+    "@types/react-dom": "^18.2.19",
+    "typescript": "^5.3.3",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.1.0",
+    "ts-proto": "^1.165.1"
+  }
+}

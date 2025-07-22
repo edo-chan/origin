@@ -1,0 +1,34 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {
+        "attributes": [
+          { "key": "service.name", "value": { "stringValue": "curl-smoke" } }
+        ]
+      },
+      "scopeMetrics": [
+        {
+          "scope": { "name": "curl", "version": "0.1.0" },
+          "metrics": [
+            {
+              "name": "treasury_worker_startups_total",
+              "description": "curl smoke counter",
+              "sum": {
+                "aggregationTemporality": 1,
+                "isMonotonic": true,
+                "dataPoints": [
+                  {
+                    "asInt": "1",
+                    "attributes": [
+                      { "key": "task_queue", "value": { "stringValue": "treasury" } }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
