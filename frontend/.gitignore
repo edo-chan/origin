@@ -36,3 +36,5 @@ next-env.d.ts
 
 # generated proto files
 /proto/gen/
+*storybook.log
+storybook-static

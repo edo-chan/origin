@@ -1,4 +1,4 @@
-import { HelloRequest, HelloResponse } from '../types';
+import type { HelloRequest, HelloResponse } from '@/proto/greeter';
 
 // Base URL for API requests
 const getBaseUrl = () => {

@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(cargo check:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install)",
+      "Bash(find:*)",
+      "Bash(cargo:*)",
+      "Bash(docker compose:*)",
+      "Bash(protoc:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(docker logs:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx:*)",
+      "Bash(node_modules/.bin/playwright test:*)",
+      "Bash(./node_modules/.bin/playwright test:*)",
+      "Bash(timeout 60 npm run test:e2e:*)",
+      "Bash(git checkout:*)",
+      "Bash(docker system prune:*)",
+      "Bash(docker network:*)",
+      "Bash(docker rm:*)",
+      "Bash(true)",
+      "Bash(brew:*)",
+      "Bash(/opt/homebrew/Cellar/postgresql@16/16.4_3/bin/psql -d postgres -c \"\\du\")",
+      "Bash(/opt/homebrew/Cellar/postgresql@16/16.4_3/bin/createdb template)",
+      "Bash(git stash:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}

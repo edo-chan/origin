@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { HelloRequest, HelloResponse } from './types';
+import type { HelloRequest, HelloResponse } from '@/proto/greeter';
 
 // Define the structure of the greeter state
 interface GreeterState {

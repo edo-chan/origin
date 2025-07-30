@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai';
 import { requestAtom, replyAtom, loadingAtom, errorAtom, nameAtom } from './atoms';
 import { sayHello as sayHelloAction } from './service';
-import { HelloRequest } from './types';
+import type { HelloRequest } from '@/proto/greeter';
 
 /**
  * Hook for using the Greeter domain in components

@@ -1,6 +1,3 @@
-// Export types
-export * from './types';
-
 // Export atoms
 export * from './atoms';
 
