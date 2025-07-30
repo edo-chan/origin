@@ -26,6 +26,21 @@ const nextConfig = {
     
     const protoPath = fs.existsSync(dockerProtoPath) ? dockerProtoPath : localProtoPath;
     config.resolve.alias['@/proto'] = protoPath;
+    
+    // Fix protobufjs module resolution
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+    };
+    
+    // Add protobufjs alias to handle imports correctly
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'protobufjs/minimal': path.resolve(__dirname, 'node_modules/protobufjs/minimal.js'),
+      'protobufjs': path.resolve(__dirname, 'node_modules/protobufjs/index.js')
+    };
+    
     return config;
   },
 };
