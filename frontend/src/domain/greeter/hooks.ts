@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai';
 import { requestAtom, replyAtom, loadingAtom, errorAtom, nameAtom } from './atoms';
-import { sayHello as sayHelloAction } from './service';
+import { sayHello as sayHelloAction } from './action';
 import type { HelloRequest } from '@/proto/greeter';
 
 /**
