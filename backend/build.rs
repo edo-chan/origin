@@ -7,9 +7,7 @@ fn compile_proto(
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Ensure proto/rust/gen directory exists
     let rust_out_dir = PathBuf::from("../proto/rust/gen");
-    if !rust_out_dir.exists() {
-        return Err("Required directory proto/rust/gen does not exist".into());
-    }
+    fs::create_dir_all(&rust_out_dir)?;
     
     tonic_build::configure()
         .compile_well_known_types(true)
@@ -44,9 +42,7 @@ fn compile_web(
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Ensure proto/gen/web directory exists
     let web_out_dir = PathBuf::from("../proto/gen/web");
-    if !web_out_dir.exists() {
-        return Err("Required directory proto/gen/web does not exist".into());
-    }
+    fs::create_dir_all(&web_out_dir)?;
 
     let frontend_dir = manifest_dir.join("../frontend");
     if !frontend_dir.join("node_modules").exists() {

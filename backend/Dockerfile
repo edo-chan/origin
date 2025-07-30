@@ -8,15 +8,16 @@ RUN apt-get update && apt-get install -y protobuf-compiler curl && rm -rf /var/l
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
-# Install npm dependencies
-RUN npm install
+
+# Change to backend directory for cargo build
+WORKDIR /usr/src/app/backend
 RUN cargo build --release
 
 FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/src/app/target/release/template /usr/local/bin/template
+COPY --from=builder /usr/src/app/backend/target/release/template /usr/local/bin/template
 
-EXPOSE 50051
+EXPOSE 50051 8081
 
 CMD ["template"]
