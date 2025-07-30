@@ -1,6 +1,6 @@
 [build]
-# Use faster linker
-rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+# Use faster linker (disabled for macOS compatibility)
+# rustflags = ["-C", "link-arg=-fuse-ld=lld"]
 
 [target.x86_64-unknown-linux-gnu]
 # Enable parallel codegen and optimizations

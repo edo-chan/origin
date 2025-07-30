@@ -27,8 +27,8 @@ fn compile_envoy_descriptor_set(
     manifest_dir: PathBuf,
     proto_dir: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // envoy descriptor
-    let static_out = manifest_dir.join("envoy/proto.pb");
+    // envoy descriptor - output directly to backend directory for envoy to use
+    let static_out = manifest_dir.join("proto.pb");
     fs::create_dir_all(static_out.parent().unwrap())?;
     tonic_build::configure()
         .build_server(false)

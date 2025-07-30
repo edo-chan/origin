@@ -16,16 +16,16 @@ pub struct HelloResponse {
     pub message: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
-pub mod greeter_client {
+pub mod greeter_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
     use tonic::codegen::http::Uri;
     /// The greeting service definition
     #[derive(Debug, Clone)]
-    pub struct GreeterClient<T> {
+    pub struct GreeterServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl GreeterClient<tonic::transport::Channel> {
+    impl GreeterServiceClient<tonic::transport::Channel> {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -36,7 +36,7 @@ pub mod greeter_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> GreeterClient<T>
+    impl<T> GreeterServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
@@ -54,7 +54,7 @@ pub mod greeter_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> GreeterClient<InterceptedService<T, F>>
+        ) -> GreeterServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
@@ -68,7 +68,7 @@ pub mod greeter_client {
                 http::Request<tonic::body::BoxBody>,
             >>::Error: Into<StdError> + Send + Sync,
         {
-            GreeterClient::new(InterceptedService::new(inner, interceptor))
+            GreeterServiceClient::new(InterceptedService::new(inner, interceptor))
         }
         /// Compress requests with the given encoding.
         ///
@@ -116,20 +116,23 @@ pub mod greeter_client {
                     )
                 })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/service.Greeter/SayHello");
+            let path = http::uri::PathAndQuery::from_static(
+                "/service.GreeterService/SayHello",
+            );
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new("service.Greeter", "SayHello"));
+            req.extensions_mut()
+                .insert(GrpcMethod::new("service.GreeterService", "SayHello"));
             self.inner.unary(req, path, codec).await
         }
     }
 }
 /// Generated server implementations.
-pub mod greeter_server {
+pub mod greeter_service_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with GreeterServer.
+    /// Generated trait containing gRPC methods that should be implemented for use with GreeterServiceServer.
     #[async_trait]
-    pub trait Greeter: Send + Sync + 'static {
+    pub trait GreeterService: Send + Sync + 'static {
         /// Sends a greeting
         async fn say_hello(
             &self,
@@ -138,7 +141,7 @@ pub mod greeter_server {
     }
     /// The greeting service definition
     #[derive(Debug)]
-    pub struct GreeterServer<T: Greeter> {
+    pub struct GreeterServiceServer<T: GreeterService> {
         inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
@@ -146,7 +149,7 @@ pub mod greeter_server {
         max_encoding_message_size: Option<usize>,
     }
     struct _Inner<T>(Arc<T>);
-    impl<T: Greeter> GreeterServer<T> {
+    impl<T: GreeterService> GreeterServiceServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
@@ -198,9 +201,9 @@ pub mod greeter_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for GreeterServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for GreeterServiceServer<T>
     where
-        T: Greeter,
+        T: GreeterService,
         B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
@@ -216,10 +219,12 @@ pub mod greeter_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/service.Greeter/SayHello" => {
+                "/service.GreeterService/SayHello" => {
                     #[allow(non_camel_case_types)]
-                    struct SayHelloSvc<T: Greeter>(pub Arc<T>);
-                    impl<T: Greeter> tonic::server::UnaryService<super::HelloRequest>
+                    struct SayHelloSvc<T: GreeterService>(pub Arc<T>);
+                    impl<
+                        T: GreeterService,
+                    > tonic::server::UnaryService<super::HelloRequest>
                     for SayHelloSvc<T> {
                         type Response = super::HelloResponse;
                         type Future = BoxFuture<
@@ -232,7 +237,7 @@ pub mod greeter_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as Greeter>::say_hello(&inner, request).await
+                                <T as GreeterService>::say_hello(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -275,7 +280,7 @@ pub mod greeter_server {
             }
         }
     }
-    impl<T: Greeter> Clone for GreeterServer<T> {
+    impl<T: GreeterService> Clone for GreeterServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -287,7 +292,7 @@ pub mod greeter_server {
             }
         }
     }
-    impl<T: Greeter> Clone for _Inner<T> {
+    impl<T: GreeterService> Clone for _Inner<T> {
         fn clone(&self) -> Self {
             Self(Arc::clone(&self.0))
         }
@@ -297,7 +302,7 @@ pub mod greeter_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: Greeter> tonic::server::NamedService for GreeterServer<T> {
-        const NAME: &'static str = "service.Greeter";
+    impl<T: GreeterService> tonic::server::NamedService for GreeterServiceServer<T> {
+        const NAME: &'static str = "service.GreeterService";
     }
 }

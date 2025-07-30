@@ -53,7 +53,7 @@ static_resources:
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
               proto_descriptor: "/etc/envoy/proto.pb"
-              services: ["service.Greeter"]
+              services: ["service.GreeterService"]
               auto_mapping: true
               print_options:
                 add_whitespace: true

@@ -1,7 +1,7 @@
 use tonic::{Request, Response, Status};
 use tracing::{info, error, instrument};
 use crate::model::greeting::GreetingRepository;
-use crate::gen::{greeter_server::Greeter, HelloRequest, HelloResponse};
+use crate::gen::{greeter_service_server::GreeterService, HelloRequest, HelloResponse};
 
 #[derive(Debug)]
 pub struct GreeterHandler {
@@ -15,7 +15,7 @@ impl GreeterHandler {
 }
 
 #[tonic::async_trait]
-impl Greeter for GreeterHandler {
+impl GreeterService for GreeterHandler {
     #[instrument(skip(self))]
     async fn say_hello(
         &self,

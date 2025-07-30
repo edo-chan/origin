@@ -16,7 +16,7 @@ pub mod logging;
 use sqlx::PgPool;
 use crate::handler::greeter::GreeterHandler;
 use crate::model::greeting::GreetingRepository;
-use crate::gen::greeter_server::GreeterServer;
+use crate::gen::greeter_service_server::GreeterServiceServer;
 
 #[tokio::main]
 #[instrument]
@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Build and run the gRPC server
     let grpc_server = Server::builder()
         .layer(ServiceBuilder::new().layer(cors))
-        .add_service(GreeterServer::new(greeter))
+        .add_service(GreeterServiceServer::new(greeter))
         .serve(grpc_addr);
 
     info!("gRPC server listening on {}", grpc_addr);
