@@ -15,7 +15,10 @@ fn compile_proto(
         .build_client(true)
         .out_dir("../proto/rust/gen")
         .type_attribute(".", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .compile(&proto.iter().map(|p| p.as_path()).collect::<Vec<_>>(), &[proto_dir])?;
+        .compile(
+            &proto.iter().map(|p| p.as_path()).collect::<Vec<_>>(), 
+            &[proto_dir, "../googleapis"]
+        )?;
     Ok(())
 }
 
@@ -31,7 +34,10 @@ fn compile_envoy_descriptor_set(
         .build_server(false)
         .build_client(false)
         .file_descriptor_set_path(&static_out)
-        .compile(&all_proto_definitions.iter().map(|p| p.as_path()).collect::<Vec<_>>(), &[proto_dir])?;
+        .compile(
+            &all_proto_definitions.iter().map(|p| p.as_path()).collect::<Vec<_>>(), 
+            &[proto_dir, "../googleapis"]
+        )?;
     Ok(())
 }
 
@@ -62,6 +68,7 @@ fn compile_web(
     ];
     let import_path = format!("-I={proto_dir}");
     ts_args.push(import_path);
+    ts_args.push("-I=../googleapis".to_string());
     for proto in all_proto_definitions.iter() {
         ts_args.push(format!("{}", proto.display()));
     }

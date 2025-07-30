@@ -7,12 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "storybook": "storybook dev -p 6006 --manager-head-html='<base href=\"/ui/\">' --preview-head-html='<base href=\"/ui/\">'",
+    "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build --output-dir dist-storybook"
   },
   "dependencies": {
     "@vanilla-extract/css": "^1.14.0",
     "@vanilla-extract/next-plugin": "^2.3.2",
+    "@vanilla-extract/sprinkles": "^1.6.1",
     "jotai": "^2.6.0",
     "next": "^14.1.0",
     "protobufjs": "^7.5.3",

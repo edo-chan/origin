@@ -2,14 +2,15 @@ import type { HelloRequest, HelloResponse } from '@/proto/greeter';
 
 // Base URL for API requests
 const getBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_BACKEND_URL) {
-    return process.env.NEXT_PUBLIC_BACKEND_URL;
+  // Always use the Next.js server's /api route for client-side requests
+  // This will be rewritten to proxy to envoy:8080 in Docker or localhost:49999 locally
+  if (typeof window !== 'undefined') {
+    return '';  // Use relative URLs for client-side requests
   }
 
-  // Check if we're running in a browser environment
-  if (typeof window !== 'undefined') {
-    // Use the current hostname with port 8080
-    return `http://${window.location.hostname}:8080`;
+  // For server-side rendering, use the backend URL directly
+  if (process.env.NEXT_PUBLIC_BACKEND_URL) {
+    return process.env.NEXT_PUBLIC_BACKEND_URL;
   }
 
   // Default for server-side rendering in Docker
@@ -23,7 +24,7 @@ const baseUrl = getBaseUrl();
  */
 export const sayHello = async (request: HelloRequest): Promise<HelloResponse> => {
   try {
-    const response = await fetch(`${baseUrl}/service.Greeter/SayHello`, {
+    const response = await fetch(`/api/greeter/say-hello`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

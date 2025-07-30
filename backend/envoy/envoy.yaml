@@ -25,7 +25,7 @@ static_resources:
               domains: ["*"]
               routes:
               - match:
-                  prefix: "/service.Greeter"
+                  prefix: "/api/"
                 route:
                   cluster: grpc_service
                   timeout: 60s
@@ -35,6 +35,9 @@ static_resources:
                   cluster: grpc_service
                   timeout: 60s
           http_filters:
+          - name: envoy.filters.http.cors
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors
           - name: envoy.filters.http.grpc_json_transcoder
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder

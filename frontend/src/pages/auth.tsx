@@ -62,7 +62,7 @@ export default function Auth() {
         </form>
 
         <div className={styles.footer}>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/" className={styles.link}>
             Sign up
           </Link>

@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import Link from 'next/link';
 import * as styles from '../styles/Home.css';
 import { GreeterExample } from '../domain/greeter';
 
@@ -23,15 +24,15 @@ export default function Home() {
         <GreeterExample />
 
         <div className={styles.grid}>
-          <a href="/auth" className={styles.card}>
+          <Link href="/auth" className={styles.card}>
             <h2 className={styles.cardTitle}>Login &rarr;</h2>
             <p className={styles.cardText}>Go to the K-pop styled login page.</p>
-          </a>
+          </Link>
 
-          <a href="/dashboard" className={styles.card}>
+          <Link href="/dashboard" className={styles.card}>
             <h2 className={styles.cardTitle}>Dashboard &rarr;</h2>
             <p className={styles.cardText}>Go to the dashboard page.</p>
-          </a>
+          </Link>
 
           <a href="https://nextjs.org/docs" className={styles.card}>
             <h2 className={styles.cardTitle}>NextJS &rarr;</h2>

@@ -8,7 +8,6 @@ dc_resource('postgres', labels=["database"])
 dc_resource('redis', labels=["database"])
 dc_resource('backend', labels=["backend"], resource_deps=['postgres', 'redis'])
 dc_resource('envoy', labels=["proxy"], resource_deps=['backend'])
-dc_resource('frontend', labels=["frontend"], resource_deps=['envoy'])
 
 # Watch for changes in the backend
 watch_file('./backend/src')
@@ -29,8 +28,9 @@ print("""
 Template project is running!
 ----------------------------
 Frontend: http://localhost:3000
+Storybook: http://localhost:6006/ui
 Backend gRPC: localhost:50051
-Envoy Proxy (HTTP to gRPC): http://localhost:8080
+Envoy Proxy (HTTP to gRPC): http://localhost:49999
 Postgres: localhost:5432
 Redis: localhost:6379
 """)

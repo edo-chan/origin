@@ -4,7 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY frontend/package*.json ./
 
 # Install dependencies
 RUN npm install
@@ -12,8 +12,11 @@ RUN npm install
 # Install protobuf compiler
 RUN apk add --no-cache protobuf
 
-# Copy the rest of the code
-COPY . .
+# Copy the frontend code
+COPY frontend/ .
+
+# Copy proto files from root directory
+COPY proto/gen/web ./proto/gen/web
 
 # Build the application (includes proto generation)
 RUN npm run build

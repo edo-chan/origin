@@ -8,6 +8,7 @@ use axum::{
     Router,
 };
 use tokio::join;
+use tracing::{info, error, instrument};
 
 // Import our modules
 pub mod gen {
@@ -18,6 +19,7 @@ pub mod model;
 pub mod service;
 pub mod repository;
 pub mod domains;
+pub mod logging;
 
 use model::Database;
 use crate::handler::greeter::GreeterService;
@@ -25,7 +27,11 @@ use crate::handler::echo::echo_handler;
 use crate::service::GreeterServer;
 
 #[tokio::main]
+#[instrument]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Initialize tracing
+    logging::init_tracing();
+
     // Load environment variables from .env file if it exists
     dotenv().ok();
 
@@ -41,9 +47,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or_else(|_| "[::0]:8081".to_string())
         .parse()?;
 
-    println!("Connecting to database...");
+    info!("Connecting to database...");
     let db = Database::new(&database_url).await?;
-    println!("Database connection established");
+    info!("Database connection established");
 
     // Create the greeter service with database access
     let greeter = GreeterService::new(db);
@@ -68,17 +74,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let http_server = axum::Server::bind(&http_addr)
         .serve(http_app.into_make_service());
 
-    println!("gRPC server listening on {}", grpc_addr);
-    println!("HTTP server listening on {}", http_addr);
+    info!("gRPC server listening on {}", grpc_addr);
+    info!("HTTP server listening on {}", http_addr);
 
     // Run both servers concurrently
     let (grpc_result, http_result) = join!(grpc_server, http_server);
     
     if let Err(e) = grpc_result {
-        eprintln!("gRPC server error: {}", e);
+        error!("gRPC server error: {}", e);
     }
     if let Err(e) = http_result {
-        eprintln!("HTTP server error: {}", e);
+        error!("HTTP server error: {}", e);
     }
 
     Ok(())

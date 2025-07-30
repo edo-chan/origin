@@ -21,7 +21,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/proto/*": ["../proto/gen/web/*"]
+      "@/proto/*": ["./proto/gen/web/*", "../proto/gen/web/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
