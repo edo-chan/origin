@@ -1,54 +1,89 @@
 import React, { useState, FormEvent } from 'react';
-import { useGreeter } from '../hooks';
+import { sendEcho } from '../action';
 import * as styles from './GreeterExample.css';
 
+interface Message {
+  id: number;
+  text: string;
+  isUser: boolean;
+}
+
 const GreeterExample: React.FC = () => {
-  const { name, setName, sayHello, reply, loading, error } = useGreeter();
-  const [submitted, setSubmitted] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (!input.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now(),
+      text: input,
+      isUser: true,
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
     try {
-      await sayHello();
-    } catch (err) {
-      console.error('Error saying hello:', err);
+      const data = await sendEcho({ message: input });
+      const botMessage: Message = {
+        id: Date.now() + 1,
+        text: data.message,
+        isUser: false,
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage: Message = {
+        id: Date.now() + 1,
+        text: 'Error: Failed to send message',
+        isUser: false,
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className={styles.greeterExample}>
-      <h2 className={styles.title}>Greeter Example</h2>
-      <form onSubmit={handleSubmit}>
-        <div className={styles.formGroup}>
-          <label htmlFor="name" className={styles.label}>Your Name:</label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name"
-            required
-            className={styles.input}
-          />
-        </div>
-        <button type="submit" disabled={loading} className={styles.button}>
-          {loading ? 'Sending...' : 'Say Hello'}
+      <h2 className={styles.title}>Simple Chatbox</h2>
+      
+      <div className={styles.messagesContainer}>
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`${styles.message} ${message.isUser ? styles.userMessage : styles.botMessage}`}
+          >
+            <strong>{message.isUser ? 'You: ' : 'Echo: '}</strong>
+            {message.text}
+          </div>
+        ))}
+        {loading && (
+          <div className={styles.message}>
+            <strong>Echo: </strong>
+            <em>Typing...</em>
+          </div>
+        )}
+      </div>
+
+      <form onSubmit={handleSubmit} className={styles.chatForm}>
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type your message..."
+          disabled={loading}
+          className={styles.input}
+        />
+        <button type="submit" disabled={loading || !input.trim()} className={styles.button}>
+          Send
         </button>
       </form>
-
-      {error && (
-        <div className={styles.errorMessage}>
-          Error: {error.message}
-        </div>
-      )}
-
-      {submitted && !loading && !error && reply && (
-        <div className={styles.response}>
-          <h3 className={styles.responseTitle}>Response:</h3>
-          <p className={styles.responseMessage}>{reply.message}</p>
-        </div>
-      )}
     </div>
   );
 };

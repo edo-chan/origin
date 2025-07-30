@@ -46,7 +46,7 @@ export const label = style({
 });
 
 export const input = style({
-  width: '100%',
+  flex: 1,
   padding: '0.75rem',
   fontSize: '1.1rem',
   borderRadius: '20px', // Rounded corners for cute look
@@ -124,4 +124,41 @@ export const responseMessage = style({
   padding: '0.5rem',
   backgroundColor: 'rgba(255, 159, 215, 0.1)', // Very light pink background
   borderRadius: '15px',
+});
+
+export const messagesContainer = style({
+  height: '300px',
+  overflowY: 'auto',
+  marginBottom: '1rem',
+  padding: '1rem',
+  backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  borderRadius: '15px',
+  border: '1px solid #444',
+});
+
+export const message = style({
+  marginBottom: '0.8rem',
+  padding: '0.8rem',
+  borderRadius: '15px',
+  fontSize: '1rem',
+  lineHeight: '1.4',
+});
+
+export const userMessage = style({
+  backgroundColor: 'rgba(140, 82, 255, 0.2)',
+  color: '#e0e0e0',
+  marginLeft: '2rem',
+  textAlign: 'right',
+});
+
+export const botMessage = style({
+  backgroundColor: 'rgba(255, 159, 215, 0.2)',
+  color: '#e0e0e0',
+  marginRight: '2rem',
+  textAlign: 'left',
+});
+
+export const chatForm = style({
+  display: 'flex',
+  gap: '0.5rem',
 });

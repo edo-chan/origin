@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai';
 import { requestAtom, replyAtom, loadingAtom, errorAtom, nameAtom } from './atoms';
-import { GreeterService } from './service';
+import { sayHello as sayHelloAction } from './service';
 import { HelloRequest } from './types';
 
 /**
@@ -25,7 +25,7 @@ export const useGreeter = () => {
       setLoading(true);
       setError(null);
       
-      const response = await GreeterService.sayHello(requestToSend);
+      const response = await sayHelloAction(requestToSend);
       
       setReply(response);
       return response;

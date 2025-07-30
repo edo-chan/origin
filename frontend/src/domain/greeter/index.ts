@@ -4,8 +4,8 @@ export * from './types';
 // Export atoms
 export * from './atoms';
 
-// Export service
-export { GreeterService } from './service';
+// Export services
+export * from './service';
 
 // Export hooks
 export { useGreeter } from './hooks';

@@ -1,7 +1,6 @@
 use tonic::{Request, Response, Status};
 use crate::model::Database;
-use crate::service::greeter_server::Greeter;
-use crate::service::{HelloRequest, HelloResponse};
+use crate::service::{Greeter, HelloRequest, HelloResponse};
 
 #[derive(Debug)]
 pub struct GreeterService {
