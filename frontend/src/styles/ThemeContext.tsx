@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { themes, type ThemeName } from './themes';
+import { allThemes, type ThemeName } from './themes';
 
 interface ThemeContextType {
   currentTheme: ThemeName;
@@ -23,19 +23,19 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Apply theme class to body
   useEffect(() => {
     // Remove all theme classes
-    Object.values(themes).forEach(theme => {
+    Object.values(allThemes).forEach(theme => {
       document.body.classList.remove(theme);
     });
     
     // Add current theme class
-    document.body.classList.add(themes[currentTheme]);
+    document.body.classList.add(allThemes[currentTheme]);
   }, [currentTheme]);
   
   const setTheme = (theme: ThemeName) => {
     setCurrentTheme(theme);
   };
   
-  const availableThemes: ThemeName[] = Object.keys(themes) as ThemeName[];
+  const availableThemes: ThemeName[] = Object.keys(allThemes) as ThemeName[];
   
   return (
     <ThemeContext.Provider value={{

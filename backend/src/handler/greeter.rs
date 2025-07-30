@@ -1,21 +1,21 @@
 use tonic::{Request, Response, Status};
 use tracing::{info, error, instrument};
-use crate::model::Database;
-use crate::service::{Greeter, HelloRequest, HelloResponse};
+use crate::model::greeting::GreetingRepository;
+use crate::gen::{greeter_server::Greeter, HelloRequest, HelloResponse};
 
 #[derive(Debug)]
-pub struct GreeterService {
-    db: Database,
+pub struct GreeterHandler {
+    greeting_repo: GreetingRepository,
 }
 
-impl GreeterService {
-    pub fn new(db: Database) -> Self {
-        Self { db }
+impl GreeterHandler {
+    pub fn new(greeting_repo: GreetingRepository) -> Self {
+        Self { greeting_repo }
     }
 }
 
 #[tonic::async_trait]
-impl Greeter for GreeterService {
+impl Greeter for GreeterHandler {
     #[instrument(skip(self))]
     async fn say_hello(
         &self,
@@ -27,7 +27,7 @@ impl Greeter for GreeterService {
         let message = format!("Hello {}!", name);
 
         // Save the greeting to the database
-        if let Err(e) = self.db.save_greeting(&name, &message).await {
+        if let Err(e) = self.greeting_repo.save_greeting(&name, &message).await {
             error!(error = %e, name = %name, "Failed to save greeting to database");
             return Err(Status::internal("Failed to save greeting"));
         }

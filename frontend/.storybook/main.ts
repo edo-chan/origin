@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/nextjs';
+import { VanillaExtractPlugin } from '@vanilla-extract/webpack-plugin';
 
 const config: StorybookConfig = {
   "stories": [
@@ -8,8 +9,6 @@ const config: StorybookConfig = {
   "addons": [
     "@storybook/addon-docs",
     "@storybook/addon-onboarding",
-    "@storybook/addon-controls",
-    "@storybook/addon-actions",
   ],
   "framework": {
     "name": "@storybook/nextjs",
@@ -18,13 +17,9 @@ const config: StorybookConfig = {
   "staticDirs": [
     "../public"
   ],
-  "managerHead": (head) => `
-    ${head}
-    <base href="/ui/">
-  `,
-  "previewHead": (head) => `
-    ${head}
-    <base href="/ui/">
-  `,
+  webpackFinal: async (config) => {
+    config.plugins?.push(new VanillaExtractPlugin());
+    return config;
+  },
 };
 export default config;

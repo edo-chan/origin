@@ -10,22 +10,22 @@ const spaceProperties = defineProperties({
   },
   defaultCondition: 'mobile',
   properties: {
-    // Spacing (margin, padding)
-    margin: tokens.sizing,
-    marginTop: tokens.sizing,
-    marginBottom: tokens.sizing,
-    marginLeft: tokens.sizing,
-    marginRight: tokens.sizing,
-    padding: tokens.sizing,
-    paddingTop: tokens.sizing,
-    paddingBottom: tokens.sizing,
-    paddingLeft: tokens.sizing,
-    paddingRight: tokens.sizing,
+    // Spacing (margin, padding) - both standard and t-shirt sizes
+    margin: { ...tokens.sizing, ...tokens.padding },
+    marginTop: { ...tokens.sizing, ...tokens.padding },
+    marginBottom: { ...tokens.sizing, ...tokens.padding },
+    marginLeft: { ...tokens.sizing, ...tokens.padding },
+    marginRight: { ...tokens.sizing, ...tokens.padding },
+    padding: { ...tokens.sizing, ...tokens.padding },
+    paddingTop: { ...tokens.sizing, ...tokens.padding },
+    paddingBottom: { ...tokens.sizing, ...tokens.padding },
+    paddingLeft: { ...tokens.sizing, ...tokens.padding },
+    paddingRight: { ...tokens.sizing, ...tokens.padding },
     
     // Layout
-    gap: tokens.sizing,
-    width: tokens.sizing,
-    height: tokens.sizing,
+    gap: { ...tokens.sizing, ...tokens.padding },
+    width: { ...tokens.sizing, auto: 'auto', full: '100%' },
+    height: { ...tokens.sizing, auto: 'auto', full: '100%' },
     
     // Typography
     fontSize: tokens.font.scale,
@@ -104,9 +104,38 @@ const colorProperties = defineProperties({
       neutral900: tokens.color.neutral['900'],
       
       // Semantic colors
+      success50: tokens.color.success['50'],
+      success100: tokens.color.success['100'],
+      success200: tokens.color.success['200'],
+      success300: tokens.color.success['300'],
+      success400: tokens.color.success['400'],
       success500: tokens.color.success['500'],
+      success600: tokens.color.success['600'],
+      success700: tokens.color.success['700'],
+      success800: tokens.color.success['800'],
+      success900: tokens.color.success['900'],
+      
+      warning50: tokens.color.warning['50'],
+      warning100: tokens.color.warning['100'],
+      warning200: tokens.color.warning['200'],
+      warning300: tokens.color.warning['300'],
+      warning400: tokens.color.warning['400'],
       warning500: tokens.color.warning['500'],
+      warning600: tokens.color.warning['600'],
+      warning700: tokens.color.warning['700'],
+      warning800: tokens.color.warning['800'],
+      warning900: tokens.color.warning['900'],
+      
+      danger50: tokens.color.danger['50'],
+      danger100: tokens.color.danger['100'],
+      danger200: tokens.color.danger['200'],
+      danger300: tokens.color.danger['300'],
+      danger400: tokens.color.danger['400'],
       danger500: tokens.color.danger['500'],
+      danger600: tokens.color.danger['600'],
+      danger700: tokens.color.danger['700'],
+      danger800: tokens.color.danger['800'],
+      danger900: tokens.color.danger['900'],
     },
     
     backgroundColor: {
@@ -160,10 +189,13 @@ const colorProperties = defineProperties({
       
       // Semantic backgrounds
       success50: tokens.color.success['50'],
+      success100: tokens.color.success['100'],
       success500: tokens.color.success['500'],
       warning50: tokens.color.warning['50'],
+      warning100: tokens.color.warning['100'],
       warning500: tokens.color.warning['500'],
       danger50: tokens.color.danger['50'],
+      danger100: tokens.color.danger['100'],
       danger500: tokens.color.danger['500'],
       
       // Transparent
@@ -194,15 +226,16 @@ const layoutProperties = defineProperties({
     boxShadow: tokens.shadow,
     
     // Display
-    display: ['block', 'inline', 'inline-block', 'flex', 'inline-flex', 'grid', 'none'],
+    display: ['block', 'inline', 'inline-block', 'flex', 'inline-flex', 'grid', 'inline-grid', 'none'],
     
     // Flexbox
     flexDirection: ['row', 'column', 'row-reverse', 'column-reverse'],
     alignItems: ['flex-start', 'flex-end', 'center', 'baseline', 'stretch'],
     justifyContent: ['flex-start', 'flex-end', 'center', 'space-between', 'space-around', 'space-evenly'],
+    flexWrap: ['nowrap', 'wrap', 'wrap-reverse'],
     
     // Typography
-    fontFamily: tokens.font,
+    fontFamily: [tokens.font.body, tokens.font.heading, tokens.font.mono],
     fontWeight: ['400', '500', '600', '700'],
     textAlign: ['left', 'center', 'right'],
     
@@ -215,6 +248,11 @@ const layoutProperties = defineProperties({
     
     // Cursor
     cursor: ['pointer', 'default', 'not-allowed', 'text'],
+    
+    // Overflow
+    overflow: ['visible', 'hidden', 'scroll', 'auto'],
+    overflowX: ['visible', 'hidden', 'scroll', 'auto'],
+    overflowY: ['visible', 'hidden', 'scroll', 'auto'],
   },
 });
 

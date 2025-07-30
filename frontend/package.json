@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6006 --no-open",
     "build-storybook": "storybook build --output-dir dist-storybook"
   },
   "dependencies": {
@@ -28,6 +28,7 @@
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",
+    "@vanilla-extract/webpack-plugin": "^2.3.22",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.1.0",
     "eslint-plugin-storybook": "^9.0.18",

@@ -1,39 +1,29 @@
 import React from 'react';
 import { cardBase, sizeVariants, sizeVariantsT, variantStyles } from './Card.css';
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Standard size */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  /** T-shirt size */
-  sizeT?: 'tshirtXS' | 'tshirtS' | 'tshirtM' | 'tshirtL' | 'tshirtXL';
-  /** Visual variant */
-  variant?: 'primary' | 'secondary' | 'tertiary';
-  /** Card content */
+export interface CardProps {
   children: React.ReactNode;
+  size?: keyof typeof sizeVariants;
+  sizeT?: keyof typeof sizeVariantsT;
+  variant?: keyof typeof variantStyles;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 export const Card: React.FC<CardProps> = ({
+  children,
   size = 'md',
   sizeT,
   variant = 'tertiary',
-  children,
-  className,
-  ...props
+  className = '',
 }) => {
-  // Use sizeT if provided, otherwise use size
   const sizeClass = sizeT ? sizeVariantsT[sizeT] : sizeVariants[size];
-  
-  const classes = [
-    cardBase,
-    sizeClass,
-    variantStyles[variant],
-    className,
-  ]
+  const classes = [cardBase, sizeClass, variantStyles[variant], className]
     .filter(Boolean)
     .join(' ');
 
   return (
-    <div className={classes} {...props}>
+    <div className={classes}>
       {children}
     </div>
   );

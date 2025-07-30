@@ -20,6 +20,24 @@ export const tokens = createGlobalTheme(':root', {
     tshirtXXL: '64px',  // 64px
   },
   
+  padding: {
+    // Standard padding (same as sizing)
+    xs: '4px',
+    sm: '8px',  
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+    
+    // T-shirt padding (same as sizing)
+    tshirtXXS: '4px',
+    tshirtXS: '8px',
+    tshirtS: '16px',
+    tshirtM: '24px',
+    tshirtL: '32px',
+    tshirtXL: '48px',
+    tshirtXXL: '64px',
+  },
+  
   color: {
     // Primary palette (blue-ish)
     primary: {
@@ -154,6 +172,7 @@ export const tokens = createGlobalTheme(':root', {
 // Dark theme variant
 export const darkTheme = createTheme(tokens, {
   sizing: tokens.sizing, // Same sizing
+  padding: tokens.padding, // Same padding
   radius: tokens.radius, // Same radius
   shadow: {
     sm: '0 1px 2px 0 rgb(0 0 0 / 0.3)',
@@ -190,6 +209,10 @@ export const darkTheme = createTheme(tokens, {
 
 // Export theme class names for easy switching
 export const themes = {
-  light: tokens,
+  light: 'light-theme',
   dark: darkTheme,
 } as const;
+
+// Type exports for TypeScript
+export type ThemeTokens = typeof tokens;
+export type ThemeNames = keyof typeof themes;

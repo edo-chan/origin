@@ -1,159 +1,122 @@
 import { style, styleVariants } from '@vanilla-extract/css';
 import { tokens } from '../../styles/tokens.css';
-import { sprinkles } from '../../styles/sprinkles.css';
 
-// Base input styles
-export const inputBase = style([
-  sprinkles({
-    display: 'block',
-    fontFamily: 'body',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    backgroundColor: 'neutral50',
-    color: 'neutral900',
-  }),
-  {
-    width: '100%',
-    transition: 'all 0.2s ease-in-out',
-    outline: 'none',
-    
-    ':focus': {
-      borderColor: tokens.color.primary['500'],
-      boxShadow: `0 0 0 1px ${tokens.color.primary['500']}`,
-    },
-    
-    ':disabled': {
-      backgroundColor: tokens.color.neutral['100'],
-      color: tokens.color.neutral['400'],
-      cursor: 'not-allowed',
-    },
-    
-    '::placeholder': {
-      color: tokens.color.neutral['400'],
-    },
+export const inputBase = style({
+  fontFamily: tokens.font.body,
+  borderWidth: '1px',
+  borderStyle: 'solid',
+  borderColor: tokens.color.neutral['300'],
+  backgroundColor: tokens.color.neutral['50'],
+  color: tokens.color.neutral['900'],
+  outline: 'none',
+  transition: 'all 0.2s ease-in-out',
+  
+  ':focus': {
+    borderColor: tokens.color.primary['500'],
+    boxShadow: `0 0 0 3px ${tokens.color.primary['100']}`,
   },
-]);
+  
+  ':disabled': {
+    backgroundColor: tokens.color.neutral['100'],
+    cursor: 'not-allowed',
+    opacity: '0.5',
+  },
+});
 
-// Size variants
 export const sizeVariants = styleVariants({
-  xs: [
-    sprinkles({
-      px: 'xs',
-      py: 'xs',
-      fontSize: 'xs',
-      borderRadius: 'sm',
-    }),
-  ],
-  sm: [
-    sprinkles({
-      px: 'sm',
-      py: 'xs',
-      fontSize: 'sm',
-      borderRadius: 'sm',
-    }),
-  ],
-  md: [
-    sprinkles({
-      px: 'md',
-      py: 'sm',
-      fontSize: 'base',
-      borderRadius: 'md',
-    }),
-  ],
-  lg: [
-    sprinkles({
-      px: 'lg',
-      py: 'sm',
-      fontSize: 'lg',
-      borderRadius: 'md',
-    }),
-  ],
-  xl: [
-    sprinkles({
-      px: 'xl',
-      py: 'md',
-      fontSize: 'xl',
-      borderRadius: 'lg',
-    }),
-  ],
+  xs: {
+    paddingLeft: tokens.padding.xs,
+    paddingRight: tokens.padding.xs,
+    paddingTop: tokens.padding.xs,
+    paddingBottom: tokens.padding.xs,
+    fontSize: tokens.font.scale.xs,
+    borderRadius: tokens.radius.sm,
+  },
+  sm: {
+    paddingLeft: tokens.padding.sm,
+    paddingRight: tokens.padding.sm,
+    paddingTop: tokens.padding.xs,
+    paddingBottom: tokens.padding.xs,
+    fontSize: tokens.font.scale.sm,
+    borderRadius: tokens.radius.sm,
+  },
+  md: {
+    paddingLeft: tokens.padding.md,
+    paddingRight: tokens.padding.md,
+    paddingTop: tokens.padding.sm,
+    paddingBottom: tokens.padding.sm,
+    fontSize: tokens.font.scale.base,
+    borderRadius: tokens.radius.md,
+  },
+  lg: {
+    paddingLeft: tokens.padding.lg,
+    paddingRight: tokens.padding.lg,
+    paddingTop: tokens.padding.sm,
+    paddingBottom: tokens.padding.sm,
+    fontSize: tokens.font.scale.lg,
+    borderRadius: tokens.radius.md,
+  },
+  xl: {
+    paddingLeft: tokens.padding.xl,
+    paddingRight: tokens.padding.xl,
+    paddingTop: tokens.padding.md,
+    paddingBottom: tokens.padding.md,
+    fontSize: tokens.font.scale.xl,
+    borderRadius: tokens.radius.lg,
+  },
 });
 
 export const sizeVariantsT = styleVariants({
-  tshirtXS: [
-    sprinkles({
-      px: 'tshirtXS',
-      py: 'tshirtXXS',
-      fontSize: 'xs',
-      borderRadius: 'sm',
-    }),
-  ],
-  tshirtS: [
-    sprinkles({
-      px: 'tshirtS',
-      py: 'tshirtXS',
-      fontSize: 'sm',
-      borderRadius: 'sm',
-    }),
-  ],
-  tshirtM: [
-    sprinkles({
-      px: 'tshirtM',
-      py: 'tshirtS',
-      fontSize: 'base',
-      borderRadius: 'md',
-    }),
-  ],
-  tshirtL: [
-    sprinkles({
-      px: 'tshirtL',
-      py: 'tshirtS',
-      fontSize: 'lg',
-      borderRadius: 'md',
-    }),
-  ],
-  tshirtXL: [
-    sprinkles({
-      px: 'tshirtXL',
-      py: 'tshirtM',
-      fontSize: 'xl',
-      borderRadius: 'lg',
-    }),
-  ],
+  tshirtXS: {
+    paddingLeft: tokens.padding.tshirtXS,
+    paddingRight: tokens.padding.tshirtXS,
+    paddingTop: tokens.padding.tshirtXXS,
+    paddingBottom: tokens.padding.tshirtXXS,
+    fontSize: tokens.font.scale.xs,
+    borderRadius: tokens.radius.sm,
+  },
+  tshirtS: {
+    paddingLeft: tokens.padding.tshirtS,
+    paddingRight: tokens.padding.tshirtS,
+    paddingTop: tokens.padding.tshirtXS,
+    paddingBottom: tokens.padding.tshirtXS,
+    fontSize: tokens.font.scale.sm,
+    borderRadius: tokens.radius.sm,
+  },
+  tshirtM: {
+    paddingLeft: tokens.padding.tshirtM,
+    paddingRight: tokens.padding.tshirtM,
+    paddingTop: tokens.padding.tshirtS,
+    paddingBottom: tokens.padding.tshirtS,
+    fontSize: tokens.font.scale.base,
+    borderRadius: tokens.radius.md,
+  },
+  tshirtL: {
+    paddingLeft: tokens.padding.tshirtL,
+    paddingRight: tokens.padding.tshirtL,
+    paddingTop: tokens.padding.tshirtS,
+    paddingBottom: tokens.padding.tshirtS,
+    fontSize: tokens.font.scale.lg,
+    borderRadius: tokens.radius.md,
+  },
+  tshirtXL: {
+    paddingLeft: tokens.padding.tshirtXL,
+    paddingRight: tokens.padding.tshirtXL,
+    paddingTop: tokens.padding.tshirtM,
+    paddingBottom: tokens.padding.tshirtM,
+    fontSize: tokens.font.scale.xl,
+    borderRadius: tokens.radius.lg,
+  },
 });
 
-// Variant styles
 export const variantStyles = styleVariants({
-  primary: [
-    sprinkles({
-      borderColor: 'primary300',
-    }),
-    {
-      ':focus': {
-        borderColor: tokens.color.primary['500'],
-        boxShadow: `0 0 0 1px ${tokens.color.primary['500']}`,
-      },
-    },
-  ],
-  secondary: [
-    sprinkles({
-      borderColor: 'secondary300',
-    }),
-    {
-      ':focus': {
-        borderColor: tokens.color.secondary['500'],
-        boxShadow: `0 0 0 1px ${tokens.color.secondary['500']}`,
-      },
-    },
-  ],
-  tertiary: [
-    sprinkles({
-      borderColor: 'neutral300',
-    }),
-    {
-      ':focus': {
-        borderColor: tokens.color.neutral['500'],
-        boxShadow: `0 0 0 1px ${tokens.color.neutral['500']}`,
-      },
-    },
-  ],
+  primary: {
+    borderColor: tokens.color.primary['300'],
+  },
+  secondary: {
+    borderColor: tokens.color.secondary['300'],
+  },
+  tertiary: {
+    borderColor: tokens.color.neutral['300'],
+  },
 });

@@ -1,5 +1,5 @@
 import React, { useState, FormEvent } from 'react';
-import { sendEcho } from '../action';
+import { sayHello } from '../action';
 import * as styles from './GreeterExample.css';
 
 interface Message {
@@ -28,7 +28,7 @@ const GreeterExample: React.FC = () => {
     setLoading(true);
 
     try {
-      const data = await sendEcho({ message: input });
+      const data = await sayHello({ name: input });
       const botMessage: Message = {
         id: Date.now() + 1,
         text: data.message,
@@ -51,7 +51,7 @@ const GreeterExample: React.FC = () => {
 
   return (
     <div className={styles.greeterExample}>
-      <h2 className={styles.title}>Simple Chatbox</h2>
+      <h2 className={styles.title}>Greeter Service</h2>
       
       <div className={styles.messagesContainer}>
         {messages.map((message) => (
@@ -59,13 +59,13 @@ const GreeterExample: React.FC = () => {
             key={message.id}
             className={`${styles.message} ${message.isUser ? styles.userMessage : styles.botMessage}`}
           >
-            <strong>{message.isUser ? 'You: ' : 'Echo: '}</strong>
+            <strong>{message.isUser ? 'You: ' : 'Greeter: '}</strong>
             {message.text}
           </div>
         ))}
         {loading && (
           <div className={styles.message}>
-            <strong>Echo: </strong>
+            <strong>Greeter: </strong>
             <em>Typing...</em>
           </div>
         )}
@@ -76,7 +76,7 @@ const GreeterExample: React.FC = () => {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
+          placeholder="Enter your name..."
           disabled={loading}
           className={styles.input}
         />

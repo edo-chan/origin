@@ -1,42 +1,31 @@
 import { style, styleVariants } from '@vanilla-extract/css';
 import { tokens } from '../../styles/tokens.css';
-import { sprinkles } from '../../styles/sprinkles.css';
 
 // Base table styles
-export const tableBase = style([
-  sprinkles({
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: 'neutral200',
-    borderRadius: 'md',
-    backgroundColor: 'neutral50',
-  }),
-  {
-    width: '100%',
-    borderCollapse: 'separate',
-    borderSpacing: 0,
-    overflow: 'hidden',
-  },
-]);
+export const tableBase = style({
+  borderWidth: '1px',
+  borderStyle: 'solid',
+  borderColor: tokens.color.neutral['200'],
+  borderRadius: tokens.radius.md,
+  backgroundColor: tokens.color.neutral['50'],
+  width: '100%',
+  borderCollapse: 'separate',
+  borderSpacing: 0,
+  overflow: 'hidden',
+});
 
-export const tableHeader = style([
-  sprinkles({
-    backgroundColor: 'neutral100',
-    borderColor: 'neutral200',
-    fontWeight: '600',
-    textAlign: 'left',
-  }),
-]);
+export const tableHeader = style({
+  backgroundColor: tokens.color.neutral['100'],
+  borderColor: tokens.color.neutral['200'],
+  fontWeight: '600',
+  textAlign: 'left',
+});
 
-export const tableCell = style([
-  sprinkles({
-    borderColor: 'neutral200',
-  }),
-  {
-    borderBottomWidth: '1px',
-    borderBottomStyle: 'solid',
-  },
-]);
+export const tableCell = style({
+  borderColor: tokens.color.neutral['200'],
+  borderBottomWidth: '1px',
+  borderBottomStyle: 'solid',
+});
 
 // Size variants
 export const sizeVariants = styleVariants({
@@ -127,49 +116,37 @@ export const sizeVariantsT = styleVariants({
 
 // Variant styles
 export const variantStyles = styleVariants({
-  primary: [
-    sprinkles({
-      borderColor: 'primary200',
-    }),
-    {
-      selectors: {
-        '& thead': {
-          backgroundColor: tokens.color.primary['50'],
-        },
-        '& tbody tr:hover': {
-          backgroundColor: tokens.color.primary['25'] || tokens.color.primary['50'],
-        },
+  primary: {
+    borderColor: tokens.color.primary['200'],
+    selectors: {
+      '& thead': {
+        backgroundColor: tokens.color.primary['50'],
+      },
+      '& tbody tr:hover': {
+        backgroundColor: tokens.color.primary['50'],
       },
     },
-  ],
-  secondary: [
-    sprinkles({
-      borderColor: 'secondary200',
-    }),
-    {
-      selectors: {
-        '& thead': {
-          backgroundColor: tokens.color.secondary['50'],
-        },
-        '& tbody tr:hover': {
-          backgroundColor: tokens.color.secondary['25'] || tokens.color.secondary['50'],
-        },
+  },
+  secondary: {
+    borderColor: tokens.color.secondary['200'],
+    selectors: {
+      '& thead': {
+        backgroundColor: tokens.color.secondary['50'],
+      },
+      '& tbody tr:hover': {
+        backgroundColor: tokens.color.secondary['50'],
       },
     },
-  ],
-  tertiary: [
-    sprinkles({
-      borderColor: 'neutral200',
-    }),
-    {
-      selectors: {
-        '& thead': {
-          backgroundColor: tokens.color.neutral['100'],
-        },
-        '& tbody tr:hover': {
-          backgroundColor: tokens.color.neutral['50'],
-        },
+  },
+  tertiary: {
+    borderColor: tokens.color.neutral['200'],
+    selectors: {
+      '& thead': {
+        backgroundColor: tokens.color.neutral['100'],
+      },
+      '& tbody tr:hover': {
+        backgroundColor: tokens.color.neutral['50'],
       },
     },
-  ],
+  },
 });

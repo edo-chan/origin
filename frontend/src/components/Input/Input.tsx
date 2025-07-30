@@ -1,7 +1,7 @@
 import React from 'react';
 import { inputBase, sizeVariants, sizeVariantsT, variantStyles } from './Input.css';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /** Standard size */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   /** T-shirt size */
