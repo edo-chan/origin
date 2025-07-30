@@ -76,7 +76,9 @@
       "Bash(--proto_path=googleapis )",
       "Bash(--descriptor_set_out=backend/proto.pb )",
       "Bash(proto/greeter.proto)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(chmod:*)",
+      "Bash(./migrate.sh)"
     ],
     "deny": []
   }
