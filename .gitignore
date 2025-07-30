@@ -41,3 +41,6 @@ logs
 # Misc
 *.pem
 .DS_Store
+
+# Data persistence
+/data/
