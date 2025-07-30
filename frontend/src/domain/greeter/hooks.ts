@@ -1,56 +1,35 @@
 import { useAtom } from 'jotai';
-import { requestAtom, replyAtom, loadingAtom, errorAtom, nameAtom } from './atoms';
-import { sayHello as sayHelloAction } from './action';
-import type { HelloRequest } from '@/proto/greeter';
+import { nameAtom, replyAtom, loadingAtom, errorAtom } from './atoms';
+import { sayHello } from './action';
 
-/**
- * Hook for using the Greeter domain in components
- * Provides state and actions for interacting with the Greeter service
- */
 export const useGreeter = () => {
-  const [request, setRequest] = useAtom(requestAtom);
+  const [name, setName] = useAtom(nameAtom);
   const [reply, setReply] = useAtom(replyAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
   const [error, setError] = useAtom(errorAtom);
-  const [name, setName] = useAtom(nameAtom);
 
-  /**
-   * Say hello to the server
-   * @param customRequest Optional custom request to override the current request state
-   */
-  const sayHello = async (customRequest?: HelloRequest) => {
-    const requestToSend = customRequest || request;
-    
+  const handleSayHello = async () => {
+    if (!name.trim()) return;
+
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await sayHelloAction(requestToSend);
-      
-      setReply(response);
-      return response;
+      const response = await sayHello({ name });
+      setReply({ message: response.message });
     } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
-      throw error;
+      setError(err instanceof Error ? err : new Error('Unknown error'));
     } finally {
       setLoading(false);
     }
   };
 
   return {
-    // State
-    request,
+    name,
+    setName,
     reply,
     loading,
     error,
-    name,
-    
-    // Setters
-    setRequest,
-    setName,
-    
-    // Actions
-    sayHello,
+    sayHello: handleSayHello,
   };
 };

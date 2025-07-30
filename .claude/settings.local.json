@@ -37,7 +37,11 @@
       "Bash(touch:*)",
       "Bash(timeout 10s npm run storybook:*)",
       "Bash(timeout:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(tilt get:*)",
+      "Bash(tilt describe:*)",
+      "Bash(kubectl get:*)",
+      "Bash(tilt trigger:*)"
     ],
     "deny": []
   }
