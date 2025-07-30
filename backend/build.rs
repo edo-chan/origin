@@ -1,78 +1,119 @@
 use std::process::Command;
-use std::path::Path;
-use std::fs;
+use std::{env, fs, path::PathBuf};
 
-// Define all proto files in a single location
-const PROTO_FILES: &[&str] = &["proto/greeter.proto"];
+fn compile_proto(
+    proto: Vec<PathBuf>,
+    proto_dir: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Ensure proto/rust/gen directory exists
+    let rust_out_dir = PathBuf::from("../proto/rust/gen");
+    if !rust_out_dir.exists() {
+        return Err("Required directory proto/rust/gen does not exist".into());
+    }
+    
+    tonic_build::configure()
+        .compile_well_known_types(true)
+        .build_server(true)
+        .build_client(true)
+        .out_dir("../proto/rust/gen")
+        .type_attribute(".", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .compile(&proto.iter().map(|p| p.as_path()).collect::<Vec<_>>(), &[proto_dir])?;
+    Ok(())
+}
 
-// Define the path for the Envoy descriptor output
-const ENVOY_DESCRIPTOR_OUT: &str = "proto.pb";
+fn compile_envoy_descriptor_set(
+    all_proto_definitions: Vec<PathBuf>,
+    manifest_dir: PathBuf,
+    proto_dir: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // envoy descriptor
+    let static_out = manifest_dir.join("envoy/proto.pb");
+    fs::create_dir_all(static_out.parent().unwrap())?;
+    tonic_build::configure()
+        .build_server(false)
+        .build_client(false)
+        .file_descriptor_set_path(&static_out)
+        .compile(&all_proto_definitions.iter().map(|p| p.as_path()).collect::<Vec<_>>(), &[proto_dir])?;
+    Ok(())
+}
+
+fn compile_web(
+    all_proto_definitions: Vec<PathBuf>,
+    manifest_dir: PathBuf,
+    proto_dir: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Ensure proto/gen/web directory exists
+    let web_out_dir = PathBuf::from("../proto/gen/web");
+    if !web_out_dir.exists() {
+        return Err("Required directory proto/gen/web does not exist".into());
+    }
+
+    let frontend_dir = manifest_dir.join("../frontend");
+    if !frontend_dir.join("node_modules").exists() {
+        println!("cargo:warning=frontend node_modules does not exist. Skipping web compilation");
+        return Ok(());
+    }
+    
+    // running ts protoc
+    let mut ts_args = vec![
+        format!(
+            "--plugin={}/node_modules/.bin/protoc-gen-ts_proto",
+            frontend_dir.display()
+        ),
+        format!("--ts_proto_out={}", web_out_dir.display()),
+        "--ts_proto_opt=env=browser,outputServices=generic,forceLong=bigint,snakeToCamel=true"
+            .to_string(),
+    ];
+    let import_path = format!("-I={proto_dir}");
+    ts_args.push(import_path);
+    for proto in all_proto_definitions.iter() {
+        ts_args.push(format!("{}", proto.display()));
+    }
+    ts_args.push("--experimental_allow_proto3_optional".to_string());
+    let output = Command::new("protoc").args(ts_args).output()?;
+    if !output.status.success() {
+        println!("cargo:warning=ts-protoc error: {}", output.status);
+    }
+
+    Ok(())
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Generate Rust code from proto files using tonic-build
-    tonic_build::configure()
-        .compile(PROTO_FILES, &["proto"])?;
+    println!("cargo:rerun-if-changed=../proto/*");
+    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR")?);
+    let proto_dir = manifest_dir.join("../proto");
 
-    // Create frontend proto/gen directory if it doesn't exist
-    let frontend_gen_dir = Path::new("../frontend/proto/gen");
-    if !frontend_gen_dir.exists() {
-        fs::create_dir_all(frontend_gen_dir)?;
+    // Current proto definitions - simplified for this template
+    let proto_definitions = vec![
+        vec![proto_dir.join("greeter.proto")],
+    ];
+
+    let mut all_proto_definitions = Vec::new();
+    for proto in proto_definitions.clone() {
+        all_proto_definitions.extend(proto);
     }
 
-    // Generate TypeScript types directly in the frontend directory
-    // For each proto file, we need to run the protoc command
-    // Make TypeScript generation optional - log errors but don't fail the build
-    for proto_file in PROTO_FILES {
-        match Command::new("npx")
-            .args([
-                "protoc",
-                "--plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto",
-                "--ts_proto_out=../frontend/proto/gen",
-                "--ts_proto_opt=esModuleInterop=true,outputServices=false,outputJsonMethods=false,outputClientImpl=false,fileSuffix=",
-                "-I=proto",
-                proto_file
-            ])
-            .status() {
-                Ok(status) => {
-                    if !status.success() {
-                        eprintln!("Warning: Failed to generate TypeScript types for {}", proto_file);
-                    } else {
-                        println!("Successfully generated TypeScript types for frontend from {}", proto_file);
-                    }
-                },
-                Err(e) => {
-                    eprintln!("Warning: Failed to execute TypeScript generation command: {}", e);
-                }
-            }
+    // compile rust proto generator
+    for proto in proto_definitions {
+        compile_proto(
+            proto,
+            proto_dir.to_str().unwrap(),
+        )?;
     }
 
-    // Generate Envoy descriptor file
-    println!("Generating Envoy descriptor file...");
-    match Command::new("protoc")
-        .args([
-            "-Iproto",
-            "--include_imports",
-            "--include_source_info",
-            &format!("--descriptor_set_out={}", ENVOY_DESCRIPTOR_OUT),
-            "proto/greeter.proto"
-        ])
-        .status() {
-            Ok(status) => {
-                if !status.success() {
-                    eprintln!("Warning: Failed to generate Envoy descriptor file");
-                } else {
-                    println!("Successfully generated Envoy descriptor file at {}", ENVOY_DESCRIPTOR_OUT);
-                }
-            },
-            Err(e) => {
-                eprintln!("Warning: Failed to execute Envoy descriptor generation command: {}", e);
-            }
-        }
+    // compile envoy descriptor set
+    compile_envoy_descriptor_set(
+        all_proto_definitions.clone(),
+        manifest_dir.clone(),
+        proto_dir.to_str().unwrap(),
+    )?;
 
-    // Set up cargo to recompile if any proto file changes
-    for proto_file in PROTO_FILES {
-        println!("cargo:rerun-if-changed={}", proto_file);
-    }
+    // compile web
+    compile_web(
+        all_proto_definitions.clone(),
+        manifest_dir.clone(),
+        proto_dir.to_str().unwrap(),
+    )?;
 
     Ok(())
 }
