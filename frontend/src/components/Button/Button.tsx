@@ -1,10 +1,10 @@
 import React from 'react';
-import { buttonBase, sizeVariants, sizeVariantsT, variantStyles } from './Button.css';
+import { buttonBase, sizeVariants, variantStyles } from './Button.css';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Standard size */
+  /** Button size */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  /** T-shirt size */
+  /** T-shirt size (overrides size if provided) */
   sizeT?: 'tshirtXS' | 'tshirtS' | 'tshirtM' | 'tshirtL' | 'tshirtXL';
   /** Visual variant */
   variant?: 'primary' | 'secondary' | 'tertiary';
@@ -21,11 +21,11 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   // Use sizeT if provided, otherwise use size
-  const sizeClass = sizeT ? sizeVariantsT[sizeT] : sizeVariants[size];
+  const finalSize = sizeT || size;
   
   const classes = [
     buttonBase,
-    sizeClass,
+    sizeVariants[finalSize as keyof typeof sizeVariants],
     variantStyles[variant],
     className,
   ]

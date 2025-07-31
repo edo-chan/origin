@@ -1,7 +1,16 @@
 import type { Preview } from '@storybook/nextjs';
 import React from 'react';
 import { ThemeProvider } from '../src/styles/ThemeContext';
-import '../src/styles/tokens.css';
+import '../src/styles/global.css';
+import '../src/styles/theme.css.ts';
+import '../src/styles/darkTheme.css.ts';
+import '../src/styles/cyberpunkTheme.css.ts';
+import '../src/styles/japanese90sTheme.css.ts';
+import '../src/styles/disneyTheme.css.ts';
+import '../src/styles/neoBrutalTheme.css.ts';
+import '../src/styles/kdramaTheme.css.ts';
+import '../src/styles/almostHermesTheme.css.ts';
+import '../src/styles/slateMonochromeTheme.css.ts';
 
 const preview: Preview = {
   parameters: {

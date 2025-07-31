@@ -1,14 +1,11 @@
-/* Import cute K-drama style fonts from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Hi+Melody&display=swap');
-
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: 'Gaegu', 'Hi Melody', cursive;
-  background-color: #121212;
-  color: #e0e0e0;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text);
+  background-color: var(--color-background);
 }
 
 a {

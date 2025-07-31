@@ -1,21 +1,22 @@
 import React from 'react';
-import { tokens } from '../../styles/tokens.css';
 import { 
   stackBase, 
   directionVariants, 
   alignVariants, 
   justifyVariants, 
-  wrapVariants 
+  wrapVariants,
+  gapVariants,
+  paddingVariants
 } from './Stack.css';
 
 export interface StackProps {
   children: React.ReactNode;
   direction?: 'row' | 'column';
-  gap?: keyof typeof tokens.padding;
-  align?: keyof typeof alignVariants;
-  justify?: keyof typeof justifyVariants;
+  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  align?: 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
+  justify?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
   wrap?: boolean;
-  padding?: keyof typeof tokens.padding;
+  padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   style?: React.CSSProperties;
 }
@@ -23,17 +24,19 @@ export interface StackProps {
 export const Stack: React.FC<StackProps> = ({
   children,
   direction = 'column',
-  gap,
+  gap = 'none',
   align,
   justify,
   wrap = false,
-  padding,
+  padding = 'none',
   className = '',
   style = {},
 }) => {
   const stackClasses = [
     stackBase,
     directionVariants[direction],
+    gapVariants[gap],
+    paddingVariants[padding],
     align && alignVariants[align],
     justify && justifyVariants[justify],
     wrap && wrapVariants.wrap,
@@ -42,14 +45,8 @@ export const Stack: React.FC<StackProps> = ({
     .filter(Boolean)
     .join(' ');
 
-  const dynamicStyle = {
-    ...style,
-    ...(gap && { gap: tokens.padding[gap] }),
-    ...(padding && { padding: tokens.padding[padding] }),
-  };
-
   return (
-    <div className={stackClasses} style={dynamicStyle}>
+    <div className={stackClasses} style={style}>
       {children}
     </div>
   );

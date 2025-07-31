@@ -1,152 +1,106 @@
-import { style, styleVariants } from '@vanilla-extract/css';
-import { tokens } from '../../styles/tokens.css';
+import { style, styleVariants, globalStyle } from '@vanilla-extract/css';
+import { theme } from '../../styles/theme.css';
 
 // Base table styles
 export const tableBase = style({
-  borderWidth: '1px',
-  borderStyle: 'solid',
-  borderColor: tokens.color.neutral['200'],
-  borderRadius: tokens.radius.md,
-  backgroundColor: tokens.color.neutral['50'],
+  border: `${theme.border.thin} solid ${theme.color.border}`,
+  borderRadius: theme.radius.md,
+  backgroundColor: theme.color.surface,
   width: '100%',
   borderCollapse: 'separate',
   borderSpacing: 0,
   overflow: 'hidden',
+  fontFamily: theme.font.family,
+  boxShadow: theme.shadow.sm,
 });
 
 export const tableHeader = style({
-  backgroundColor: tokens.color.neutral['100'],
-  borderColor: tokens.color.neutral['200'],
-  fontWeight: '600',
+  backgroundColor: theme.color.borderLight,
+  borderColor: theme.color.border,
+  fontWeight: theme.font.weight.semibold,
   textAlign: 'left',
+  color: theme.color.text,
 });
 
 export const tableCell = style({
-  borderColor: tokens.color.neutral['200'],
-  borderBottomWidth: '1px',
-  borderBottomStyle: 'solid',
+  borderBottom: `${theme.border.thin} solid ${theme.color.border}`,
+  color: theme.color.text,
 });
 
 // Size variants
 export const sizeVariants = styleVariants({
-  xs: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.xs,
-        fontSize: tokens.font.scale.xs,
-      },
-    },
-  },
-  sm: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.sm,
-        fontSize: tokens.font.scale.sm,
-      },
-    },
-  },
-  md: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.md,
-        fontSize: tokens.font.scale.base,
-      },
-    },
-  },
-  lg: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.lg,
-        fontSize: tokens.font.scale.lg,
-      },
-    },
-  },
-  xl: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.xl,
-        fontSize: tokens.font.scale.xl,
-      },
-    },
-  },
+  xs: {},
+  sm: {},
+  md: {},
+  lg: {},
+  xl: {},
 });
 
-export const sizeVariantsT = styleVariants({
-  tshirtXS: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.tshirtXS,
-        fontSize: tokens.font.scale.xs,
-      },
-    },
-  },
-  tshirtS: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.tshirtS,
-        fontSize: tokens.font.scale.sm,
-      },
-    },
-  },
-  tshirtM: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.tshirtM,
-        fontSize: tokens.font.scale.base,
-      },
-    },
-  },
-  tshirtL: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.tshirtL,
-        fontSize: tokens.font.scale.lg,
-      },
-    },
-  },
-  tshirtXL: {
-    selectors: {
-      '& th, & td': {
-        padding: tokens.sizing.tshirtXL,
-        fontSize: tokens.font.scale.xl,
-      },
-    },
-  },
+globalStyle(`${sizeVariants.xs} th, ${sizeVariants.xs} td`, {
+  padding: theme.space.xs,
+  fontSize: theme.font.size.xs,
 });
+
+globalStyle(`${sizeVariants.sm} th, ${sizeVariants.sm} td`, {
+  padding: theme.space.sm,
+  fontSize: theme.font.size.sm,
+});
+
+globalStyle(`${sizeVariants.md} th, ${sizeVariants.md} td`, {
+  padding: theme.space.md,
+  fontSize: theme.font.size.base,
+});
+
+globalStyle(`${sizeVariants.lg} th, ${sizeVariants.lg} td`, {
+  padding: theme.space.lg,
+  fontSize: theme.font.size.lg,
+});
+
+globalStyle(`${sizeVariants.xl} th, ${sizeVariants.xl} td`, {
+  padding: theme.space.xl,
+  fontSize: theme.font.size.xl,
+});
+
 
 // Variant styles
 export const variantStyles = styleVariants({
   primary: {
-    borderColor: tokens.color.primary['200'],
-    selectors: {
-      '& thead': {
-        backgroundColor: tokens.color.primary['50'],
-      },
-      '& tbody tr:hover': {
-        backgroundColor: tokens.color.primary['50'],
-      },
-    },
+    borderColor: theme.color.primary,
   },
   secondary: {
-    borderColor: tokens.color.secondary['200'],
-    selectors: {
-      '& thead': {
-        backgroundColor: tokens.color.secondary['50'],
-      },
-      '& tbody tr:hover': {
-        backgroundColor: tokens.color.secondary['50'],
-      },
-    },
+    borderColor: theme.color.secondary,
   },
   tertiary: {
-    borderColor: tokens.color.neutral['200'],
-    selectors: {
-      '& thead': {
-        backgroundColor: tokens.color.neutral['100'],
-      },
-      '& tbody tr:hover': {
-        backgroundColor: tokens.color.neutral['50'],
-      },
-    },
+    borderColor: theme.color.border,
   },
+});
+
+globalStyle(`${variantStyles.primary} thead`, {
+  backgroundColor: theme.color.primary,
+  color: theme.color.background,
+});
+
+globalStyle(`${variantStyles.primary} tbody tr:hover`, {
+  backgroundColor: theme.color.primaryHover,
+  color: theme.color.background,
+});
+
+globalStyle(`${variantStyles.secondary} thead`, {
+  backgroundColor: theme.color.secondary,
+  color: theme.color.background,
+});
+
+globalStyle(`${variantStyles.secondary} tbody tr:hover`, {
+  backgroundColor: theme.color.secondaryHover,
+  color: theme.color.background,
+});
+
+globalStyle(`${variantStyles.tertiary} thead`, {
+  backgroundColor: theme.color.borderLight,
+  color: theme.color.text,
+});
+
+globalStyle(`${variantStyles.tertiary} tbody tr:hover`, {
+  backgroundColor: theme.color.surface,
+  color: theme.color.text,
 });

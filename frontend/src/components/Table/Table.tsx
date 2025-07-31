@@ -1,5 +1,5 @@
 import React from 'react';
-import { tableBase, tableHeader, tableCell, sizeVariants, sizeVariantsT, variantStyles } from './Table.css';
+import { tableBase, tableHeader, tableCell, sizeVariants, variantStyles } from './Table.css';
 
 export interface TableColumn {
   key: string;
@@ -8,10 +8,8 @@ export interface TableColumn {
 }
 
 export interface TableProps {
-  /** Standard size */
+  /** Size variant */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  /** T-shirt size */
-  sizeT?: 'tshirtXS' | 'tshirtS' | 'tshirtM' | 'tshirtL' | 'tshirtXL';
   /** Visual variant */
   variant?: 'primary' | 'secondary' | 'tertiary';
   /** Table columns configuration */
@@ -24,18 +22,14 @@ export interface TableProps {
 
 export const Table: React.FC<TableProps> = ({
   size = 'md',
-  sizeT,
   variant = 'tertiary',
   columns,
   data,
   className,
 }) => {
-  // Use sizeT if provided, otherwise use size
-  const sizeClass = sizeT ? sizeVariantsT[sizeT] : sizeVariants[size];
-  
   const classes = [
     tableBase,
-    sizeClass,
+    sizeVariants[size],
     variantStyles[variant],
     className,
   ]

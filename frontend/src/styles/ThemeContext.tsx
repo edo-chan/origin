@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { allThemes, type ThemeName } from './themes';
+
+type ThemeName = 'light' | 'dark' | 'cyberpunk' | 'japanese90s' | 'disney' | 'neobrutal' | 'kdrama' | 'almosthermes' | 'slate-monochrome';
 
 interface ThemeContextType {
   currentTheme: ThemeName;
@@ -7,7 +8,11 @@ interface ThemeContextType {
   availableThemes: ThemeName[];
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType>({
+  currentTheme: 'light',
+  setTheme: () => {},
+  availableThemes: ['light', 'dark', 'cyberpunk', 'japanese90s', 'disney', 'neobrutal', 'kdrama', 'almosthermes', 'slate-monochrome'],
+});
 
 export interface ThemeProviderProps {
   children: React.ReactNode;
@@ -20,29 +25,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 }) => {
   const [currentTheme, setCurrentTheme] = useState<ThemeName>(defaultTheme);
   
-  // Apply theme class to body
+  // Apply theme via data attribute on document root
   useEffect(() => {
-    // Remove all theme classes
-    Object.values(allThemes).forEach(theme => {
-      document.body.classList.remove(theme);
-    });
-    
-    // Add current theme class
-    document.body.classList.add(allThemes[currentTheme]);
+    document.documentElement.setAttribute('data-theme', currentTheme);
   }, [currentTheme]);
   
   const setTheme = (theme: ThemeName) => {
     setCurrentTheme(theme);
   };
   
-  const availableThemes: ThemeName[] = Object.keys(allThemes) as ThemeName[];
+  const contextValue: ThemeContextType = {
+    currentTheme,
+    setTheme,
+    availableThemes: ['light', 'dark', 'cyberpunk', 'japanese90s', 'disney', 'neobrutal', 'kdrama', 'almosthermes', 'slate-monochrome'],
+  };
   
   return (
-    <ThemeContext.Provider value={{
-      currentTheme,
-      setTheme,
-      availableThemes,
-    }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
@@ -50,7 +49,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;

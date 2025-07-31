@@ -39,60 +39,60 @@ export const tokens = createGlobalTheme(':root', {
   },
   
   color: {
-    // Primary palette (blue-ish)
+    // Primary palette - Studio Ghibli sky blues
     primary: {
-      '50': '#eff6ff',
-      '100': '#dbeafe', 
-      '200': '#bfdbfe',
-      '300': '#93c5fd',
-      '400': '#60a5fa',
-      '500': '#3b82f6',
-      '600': '#2563eb',
-      '700': '#1d4ed8',
-      '800': '#1e40af',
-      '900': '#1e3a8a',
+      '50': '#f0f9ff',
+      '100': '#e0f2fe', 
+      '200': '#bae6fd',
+      '300': '#7dd3fc',
+      '400': '#38bdf8',
+      '500': '#0ea5e9',  // Sky blue like Castle in the Sky
+      '600': '#0284c7',
+      '700': '#0369a1',
+      '800': '#075985',
+      '900': '#0c4a6e',
     },
     
-    // Secondary palette (purple-ish)
+    // Secondary palette - Studio Ghibli warm golden yellows
     secondary: {
-      '50': '#faf5ff',
-      '100': '#f3e8ff',
-      '200': '#e9d5ff', 
-      '300': '#d8b4fe',
-      '400': '#c084fc',
-      '500': '#a855f7',
-      '600': '#9333ea',
-      '700': '#7c3aed',
-      '800': '#6b21a8',
-      '900': '#581c87',
+      '50': '#fefce8',
+      '100': '#fef9c3',
+      '200': '#fef08a', 
+      '300': '#fde047',
+      '400': '#facc15',
+      '500': '#eab308',  // Warm golden yellow like Totoro's belly
+      '600': '#ca8a04',
+      '700': '#a16207',
+      '800': '#854d0e',
+      '900': '#713f12',
     },
     
-    // Tertiary palette (emerald-ish)
+    // Tertiary palette - Studio Ghibli forest greens
     tertiary: {
-      '50': '#ecfdf5',
-      '100': '#d1fae5',
-      '200': '#a7f3d0',
-      '300': '#6ee7b7',
-      '400': '#34d399',
-      '500': '#10b981',
-      '600': '#059669',
-      '700': '#047857',
-      '800': '#065f46',
-      '900': '#064e3b',
+      '50': '#f0fdf4',
+      '100': '#dcfce7',
+      '200': '#bbf7d0',
+      '300': '#86efac',
+      '400': '#4ade80',
+      '500': '#22c55e',  // Forest green like Totoro and nature
+      '600': '#16a34a',
+      '700': '#15803d',
+      '800': '#166534',
+      '900': '#14532d',
     },
     
-    // Neutral palette (gray)
+    // Neutral palette - Studio Ghibli warm earth tones
     neutral: {
-      '50': '#f9fafb',
-      '100': '#f3f4f6',
-      '200': '#e5e7eb',
-      '300': '#d1d5db',
-      '400': '#9ca3af',
-      '500': '#6b7280',
-      '600': '#4b5563',
-      '700': '#374151',
-      '800': '#1f2937',
-      '900': '#111827',
+      '50': '#faf5f0',
+      '100': '#f5ebe0',
+      '200': '#e7d2c1',
+      '300': '#d1b5a1',
+      '400': '#b89882',
+      '500': '#a08066',  // Warm earth tones like Ghibli backgrounds
+      '600': '#8b6f56',
+      '700': '#725c47',
+      '800': '#5a4938',
+      '900': '#45382c',
     },
     
     // Semantic colors
@@ -151,9 +151,9 @@ export const tokens = createGlobalTheme(':root', {
   },
   
   font: {
-    body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    mono: '"SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Source Code Pro", monospace',
+    body: '"Inter", "Nunito", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    heading: '"Fredoka One", "Comfortaa", "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    mono: '"JetBrains Mono", "Fira Code", "SF Mono", "Monaco", monospace',
     
     // Font scale (12–48px, 1.25 ratio)
     scale: {
@@ -181,13 +181,13 @@ export const darkTheme = createTheme(tokens, {
   },
   font: tokens.font, // Same fonts
   
-  // Inverted color semantics for dark mode
+  // Dark mode with Studio Ghibli colors
   color: {
-    primary: tokens.color.primary, // Keep primary as-is
-    secondary: tokens.color.secondary, // Keep secondary as-is  
-    tertiary: tokens.color.tertiary, // Keep tertiary as-is
+    primary: tokens.color.primary, // Keep Ghibli sky blues
+    secondary: tokens.color.secondary, // Keep Ghibli golden yellows  
+    tertiary: tokens.color.tertiary, // Keep Ghibli forest greens
     
-    // Invert neutral scale
+    // Invert neutral scale for dark mode
     neutral: {
       '50': tokens.color.neutral['900'],
       '100': tokens.color.neutral['800'],

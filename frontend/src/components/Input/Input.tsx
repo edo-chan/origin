@@ -1,35 +1,69 @@
 import React from 'react';
-import { inputBase, sizeVariants, sizeVariantsT, variantStyles } from './Input.css';
+import { inputBase, inputContainer, inputLabel, inputLabelError, inputErrorMessage, sizeVariants, variantStyles, errorStyles } from './Input.css';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  /** Standard size */
+  /** Input size */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  /** T-shirt size */
-  sizeT?: 'tshirtXS' | 'tshirtS' | 'tshirtM' | 'tshirtL' | 'tshirtXL';
   /** Visual variant */
   variant?: 'primary' | 'secondary' | 'tertiary';
+  /** Error state */
+  error?: boolean;
+  /** Error message */
+  errorMessage?: string;
+  /** Label for the input */
+  label?: string;
 }
 
 export const Input: React.FC<InputProps> = ({
   size = 'md',
-  sizeT,
   variant = 'tertiary',
+  error = false,
+  errorMessage,
+  label,
   className,
+  id,
   ...props
 }) => {
-  // Use sizeT if provided, otherwise use size
-  const sizeClass = sizeT ? sizeVariantsT[sizeT] : sizeVariants[size];
+  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
   
   const classes = [
     inputBase,
-    sizeClass,
-    variantStyles[variant],
+    sizeVariants[size],
+    error ? errorStyles : variantStyles[variant],
     className,
   ]
     .filter(Boolean)
     .join(' ');
 
+  const containerClasses = [inputContainer, sizeVariants[size]].join(' ');
+
   return (
-    <input className={classes} {...props} />
+    <div className={containerClasses}>
+      {label && (
+        <label 
+          htmlFor={inputId}
+          className={`${inputLabel} ${error ? inputLabelError : ''}`}
+        >
+          {label}
+        </label>
+      )}
+      <input 
+        id={inputId}
+        className={classes} 
+        aria-invalid={error}
+        aria-describedby={error && errorMessage ? `${inputId}-error` : undefined}
+        {...props} 
+      />
+      {error && errorMessage && (
+        <div 
+          id={`${inputId}-error`}
+          className={inputErrorMessage}
+          role="alert"
+          aria-live="polite"
+        >
+          {errorMessage}
+        </div>
+      )}
+    </div>
   );
 };

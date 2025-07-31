@@ -1,0 +1,15 @@
+# Ignore backend files for frontend builds
+../backend/
+../data/
+../.git/
+../*.md
+
+# Node build artifacts
+node_modules/
+.next/
+dist/
+*.log
+
+# IDE files
+.vscode/
+.idea/

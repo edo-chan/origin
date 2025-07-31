@@ -5,18 +5,11 @@ use tower_http::cors::{CorsLayer, Any};
 use tower::ServiceBuilder;
 use tracing::{info, error, instrument};
 
-// Import our modules
-pub mod gen {
-    include!(concat!(env!("CARGO_MANIFEST_DIR"), "/../proto/rust/gen/service.rs"));
-}
-pub mod handler;
-pub mod model;
-pub mod logging;
-
 use sqlx::PgPool;
-use crate::handler::greeter::GreeterHandler;
-use crate::model::greeting::GreetingRepository;
-use crate::gen::greeter_service_server::GreeterServiceServer;
+use template::handler::greeter::GreeterHandler;
+use template::model::greeting::GreetingRepository;
+use template::gen::greeter_service_server::GreeterServiceServer;
+use template::logging;
 
 #[tokio::main]
 #[instrument]

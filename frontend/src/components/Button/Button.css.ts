@@ -1,5 +1,5 @@
 import { style, styleVariants } from '@vanilla-extract/css';
-import { tokens } from '../../styles/tokens.css';
+import { theme } from '../../styles/theme.css';
 
 // Base button styles
 export const buttonBase = style({
@@ -7,17 +7,17 @@ export const buttonBase = style({
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
-  fontFamily: tokens.font.body,
-  fontWeight: '500',
-  borderWidth: '1px',
+  fontFamily: theme.font.family,
+  fontWeight: theme.font.weight.medium,
+  borderWidth: theme.border.thin,
   borderStyle: 'solid',
   transition: 'all 0.2s ease-in-out',
   textDecoration: 'none',
   outline: 'none',
   
   ':focus': {
-    outline: `2px solid ${tokens.color.primary['500']}`,
-    outlineOffset: '2px',
+    outline: `${theme.border.base} solid ${theme.color.primary}`,
+    outlineOffset: theme.border.base,
   },
   
   ':disabled': {
@@ -26,136 +26,135 @@ export const buttonBase = style({
   },
 });
 
-// Size variants (standard sizes)
+// Size variants (includes both standard and T-shirt sizes)
 export const sizeVariants = styleVariants({
+  // Standard sizes
   xs: {
-    paddingLeft: tokens.padding.xs,
-    paddingRight: tokens.padding.xs,
-    paddingTop: tokens.padding.xs,
-    paddingBottom: tokens.padding.xs,
-    fontSize: tokens.font.scale.xs,
-    borderRadius: tokens.radius.sm,
+    paddingLeft: theme.space.xs,
+    paddingRight: theme.space.xs,
+    paddingTop: theme.space.xs,
+    paddingBottom: theme.space.xs,
+    fontSize: theme.font.size.xs,
+    borderRadius: theme.radius.sm,
   },
   sm: {
-    paddingLeft: tokens.padding.sm,
-    paddingRight: tokens.padding.sm,
-    paddingTop: tokens.padding.xs,
-    paddingBottom: tokens.padding.xs,
-    fontSize: tokens.font.scale.sm,
-    borderRadius: tokens.radius.sm,
+    paddingLeft: theme.space.sm,
+    paddingRight: theme.space.sm,
+    paddingTop: theme.space.xs,
+    paddingBottom: theme.space.xs,
+    fontSize: theme.font.size.sm,
+    borderRadius: theme.radius.sm,
   },
   md: {
-    paddingLeft: tokens.padding.md,
-    paddingRight: tokens.padding.md,
-    paddingTop: tokens.padding.sm,
-    paddingBottom: tokens.padding.sm,
-    fontSize: tokens.font.scale.base,
-    borderRadius: tokens.radius.md,
+    paddingLeft: theme.space.md,
+    paddingRight: theme.space.md,
+    paddingTop: theme.space.sm,
+    paddingBottom: theme.space.sm,
+    fontSize: theme.font.size.base,
+    borderRadius: theme.radius.md,
   },
   lg: {
-    paddingLeft: tokens.padding.lg,
-    paddingRight: tokens.padding.lg,
-    paddingTop: tokens.padding.sm,
-    paddingBottom: tokens.padding.sm,
-    fontSize: tokens.font.scale.lg,
-    borderRadius: tokens.radius.md,
+    paddingLeft: theme.space.lg,
+    paddingRight: theme.space.lg,
+    paddingTop: theme.space.sm,
+    paddingBottom: theme.space.sm,
+    fontSize: theme.font.size.lg,
+    borderRadius: theme.radius.md,
   },
   xl: {
-    paddingLeft: tokens.padding.xl,
-    paddingRight: tokens.padding.xl,
-    paddingTop: tokens.padding.md,
-    paddingBottom: tokens.padding.md,
-    fontSize: tokens.font.scale.xl,
-    borderRadius: tokens.radius.lg,
+    paddingLeft: theme.space.xl,
+    paddingRight: theme.space.xl,
+    paddingTop: theme.space.md,
+    paddingBottom: theme.space.md,
+    fontSize: theme.font.size.xl,
+    borderRadius: theme.radius.lg,
   },
-});
-
-// T-shirt size variants
-export const sizeVariantsT = styleVariants({
+  
+  // T-shirt sizes
   tshirtXS: {
-    paddingLeft: tokens.padding.tshirtXS,
-    paddingRight: tokens.padding.tshirtXS,
-    paddingTop: tokens.padding.tshirtXXS,
-    paddingBottom: tokens.padding.tshirtXXS,
-    fontSize: tokens.font.scale.xs,
-    borderRadius: tokens.radius.sm,
+    paddingLeft: '8px',
+    paddingRight: '8px',
+    paddingTop: '4px',
+    paddingBottom: '4px',
+    fontSize: theme.font.size.xs,
+    borderRadius: theme.radius.sm,
   },
   tshirtS: {
-    paddingLeft: tokens.padding.tshirtS,
-    paddingRight: tokens.padding.tshirtS,
-    paddingTop: tokens.padding.tshirtXS,
-    paddingBottom: tokens.padding.tshirtXS,
-    fontSize: tokens.font.scale.sm,
-    borderRadius: tokens.radius.sm,
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    fontSize: theme.font.size.sm,
+    borderRadius: theme.radius.sm,
   },
   tshirtM: {
-    paddingLeft: tokens.padding.tshirtM,
-    paddingRight: tokens.padding.tshirtM,
-    paddingTop: tokens.padding.tshirtS,
-    paddingBottom: tokens.padding.tshirtS,
-    fontSize: tokens.font.scale.base,
-    borderRadius: tokens.radius.md,
+    paddingLeft: '24px',
+    paddingRight: '24px',
+    paddingTop: '12px',
+    paddingBottom: '12px',
+    fontSize: theme.font.size.base,
+    borderRadius: theme.radius.md,
   },
   tshirtL: {
-    paddingLeft: tokens.padding.tshirtL,
-    paddingRight: tokens.padding.tshirtL,
-    paddingTop: tokens.padding.tshirtS,
-    paddingBottom: tokens.padding.tshirtS,
-    fontSize: tokens.font.scale.lg,
-    borderRadius: tokens.radius.md,
+    paddingLeft: '32px',
+    paddingRight: '32px',
+    paddingTop: '16px',
+    paddingBottom: '16px',
+    fontSize: theme.font.size.lg,
+    borderRadius: theme.radius.md,
   },
   tshirtXL: {
-    paddingLeft: tokens.padding.tshirtXL,
-    paddingRight: tokens.padding.tshirtXL,
-    paddingTop: tokens.padding.tshirtM,
-    paddingBottom: tokens.padding.tshirtM,
-    fontSize: tokens.font.scale.xl,
-    borderRadius: tokens.radius.lg,
+    paddingLeft: '48px',
+    paddingRight: '48px',
+    paddingTop: '20px',
+    paddingBottom: '20px',
+    fontSize: theme.font.size.xl,
+    borderRadius: theme.radius.lg,
   },
 });
 
 // Variant styles
 export const variantStyles = styleVariants({
   primary: {
-    backgroundColor: tokens.color.primary['500'],
-    borderColor: tokens.color.primary['500'],
-    color: tokens.color.neutral['50'],
+    backgroundColor: theme.color.primary,
+    borderColor: theme.color.primary,
+    color: theme.color.background,
     
     ':hover': {
-      backgroundColor: tokens.color.primary['600'],
-      borderColor: tokens.color.primary['600'],
+      backgroundColor: theme.color.primaryHover,
+      borderColor: theme.color.primaryHover,
     },
     ':active': {
-      backgroundColor: tokens.color.primary['700'],
-      borderColor: tokens.color.primary['700'],
+      backgroundColor: theme.color.primaryActive,
+      borderColor: theme.color.primaryActive,
     },
   },
   secondary: {
-    backgroundColor: tokens.color.secondary['500'],
-    borderColor: tokens.color.secondary['500'],
-    color: tokens.color.neutral['50'],
+    backgroundColor: theme.color.secondary,
+    borderColor: theme.color.secondary,
+    color: theme.color.background,
     
     ':hover': {
-      backgroundColor: tokens.color.secondary['600'],
-      borderColor: tokens.color.secondary['600'],
+      backgroundColor: theme.color.secondaryHover,
+      borderColor: theme.color.secondaryHover,
     },
     ':active': {
-      backgroundColor: tokens.color.secondary['700'],
-      borderColor: tokens.color.secondary['700'],
+      backgroundColor: theme.color.secondaryActive,
+      borderColor: theme.color.secondaryActive,
     },
   },
   tertiary: {
     backgroundColor: 'transparent',
-    borderColor: tokens.color.neutral['300'],
-    color: tokens.color.neutral['700'],
+    borderColor: theme.color.border,
+    color: theme.color.text,
     
     ':hover': {
-      backgroundColor: tokens.color.neutral['50'],
-      borderColor: tokens.color.neutral['400'],
+      backgroundColor: theme.color.surface,
+      borderColor: theme.color.borderLight,
     },
     ':active': {
-      backgroundColor: tokens.color.neutral['100'],
-      borderColor: tokens.color.neutral['500'],
+      backgroundColor: theme.color.borderLight,
+      borderColor: theme.color.border,
     },
   },
 });

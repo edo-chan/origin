@@ -38,6 +38,13 @@ fn compile_envoy_descriptor_set(
             &all_proto_definitions.iter().map(|p| p.as_path()).collect::<Vec<_>>(), 
             &[proto_dir, "../googleapis"]
         )?;
+    
+    // Automatically copy proto.pb to envoy directory for Docker builds
+    let envoy_proto_pb = manifest_dir.join("envoy/proto.pb");
+    fs::create_dir_all(envoy_proto_pb.parent().unwrap())?;
+    fs::copy(&static_out, &envoy_proto_pb)?;
+    println!("cargo:warning=Copied proto.pb to envoy directory for Docker build");
+    
     Ok(())
 }
 
@@ -63,7 +70,7 @@ fn compile_web(
             frontend_dir.display()
         ),
         format!("--ts_proto_out={}", web_out_dir.display()),
-        "--ts_proto_opt=env=browser,outputServices=generic,forceLong=bigint,snakeToCamel=true"
+        "--ts_proto_opt=env=browser,outputServices=generic,forceLong=bigint,snakeToCamel=true,importSuffix=.js,esModuleInterop=true"
             .to_string(),
     ];
     let import_path = format!("-I={proto_dir}");

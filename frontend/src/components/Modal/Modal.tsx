@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { overlay, modalBase, sizeVariants, sizeVariantsT, variantStyles } from './Modal.css';
+import React from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { dialogOverlay, dialogContent, dialogClose } from './Modal.css';
 
 export interface ModalProps {
   /** Standard size */
@@ -10,66 +10,100 @@ export interface ModalProps {
   /** Visual variant */
   variant?: 'primary' | 'secondary' | 'tertiary';
   /** Whether modal is open */
-  isOpen: boolean;
-  /** Function to close modal */
-  onClose: () => void;
+  open?: boolean;
+  /** Default open state */
+  defaultOpen?: boolean;
+  /** Function called when open state changes */
+  onOpenChange?: (open: boolean) => void;
   /** Modal content */
   children: React.ReactNode;
   /** Custom class name */
   className?: string;
+  /** Modal title */
+  title?: string;
+  /** Modal description */
+  description?: string;
+  /** Show close button */
+  showCloseButton?: boolean;
 }
 
-export const Modal: React.FC<ModalProps> = ({
+export const CustomModal: React.FC<ModalProps> = ({
   size = 'md',
   sizeT,
   variant = 'tertiary',
-  isOpen,
-  onClose,
+  open,
+  defaultOpen,
+  onOpenChange,
   children,
   className,
+  title,
+  description,
+  showCloseButton = true,
 }) => {
-  // Handle escape key
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
+  const contentClasses = [
+    dialogContent,
+    className,
+  ].filter(Boolean).join(' ');
 
   // Use sizeT if provided, otherwise use size
-  const sizeClass = sizeT ? sizeVariantsT[sizeT] : sizeVariants[size];
-  
-  const classes = [
-    modalBase,
-    sizeClass,
-    variantStyles[variant],
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const sizeValue = sizeT || size;
 
-  const modalContent = (
-    <>
-      <div className={overlay} onClick={onClose} />
-      <div className={classes}>
-        {children}
-      </div>
-    </>
+  return (
+    <Dialog.Root 
+      open={open} 
+      defaultOpen={defaultOpen} 
+      onOpenChange={onOpenChange}
+    >
+      <Dialog.Portal>
+        <Dialog.Overlay className={dialogOverlay} />
+        <Dialog.Content 
+          className={contentClasses}
+          data-size={sizeValue}
+          data-variant={variant}
+        >
+          {title && (
+            <Dialog.Title style={{ 
+              margin: 0, 
+              marginBottom: '12px',
+              fontSize: '18px',
+              fontWeight: 500,
+            }}>
+              {title}
+            </Dialog.Title>
+          )}
+          {description && (
+            <Dialog.Description style={{ 
+              margin: '10px 0 20px', 
+              color: '#666',
+              fontSize: '15px',
+              lineHeight: 1.5,
+            }}>
+              {description}
+            </Dialog.Description>
+          )}
+          {children}
+          {showCloseButton && (
+            <Dialog.Close className={dialogClose} aria-label="Close">
+              ×
+            </Dialog.Close>
+          )}
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
+};
 
-  // Render modal in a portal
-  return createPortal(modalContent, document.body);
+// Keep backward compatibility
+export { CustomModal as Modal };
+
+// Simple trigger wrapper for common use case
+export const ModalTrigger: React.FC<{
+  children: React.ReactNode;
+  asChild?: boolean;
+}> = ({ children, asChild = true }) => {
+  return (
+    <Dialog.Trigger asChild={asChild}>
+      {children}
+    </Dialog.Trigger>
+  );
 };
