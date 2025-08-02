@@ -1,16 +1,16 @@
 import type { Preview } from '@storybook/nextjs';
 import React from 'react';
-import { ThemeProvider } from '../src/styles/ThemeContext';
-import '../src/styles/global.css';
-import '../src/styles/theme.css.ts';
-import '../src/styles/darkTheme.css.ts';
-import '../src/styles/cyberpunkTheme.css.ts';
-import '../src/styles/japanese90sTheme.css.ts';
-import '../src/styles/disneyTheme.css.ts';
-import '../src/styles/neoBrutalTheme.css.ts';
-import '../src/styles/kdramaTheme.css.ts';
-import '../src/styles/almostHermesTheme.css.ts';
-import '../src/styles/slateMonochromeTheme.css.ts';
+import { ThemeProvider } from '@/ui/styles/ThemeContext';
+import '@/ui/styles/global.css';
+import '@/ui/styles/theme.css.ts';
+import '@/ui/styles/darkTheme.css.ts';
+import '@/ui/styles/cyberpunkTheme.css.ts';
+import '@/ui/styles/japanese90sTheme.css.ts';
+import '@/ui/styles/disneyTheme.css.ts';
+import '@/ui/styles/neoBrutalTheme.css.ts';
+import '@/ui/styles/kdramaTheme.css.ts';
+import '@/ui/styles/almostHermesTheme.css.ts';
+import '@/ui/styles/slateMonochromeTheme.css.ts';
 
 const preview: Preview = {
   parameters: {

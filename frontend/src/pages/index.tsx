@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import * as styles from '../styles/Home.css';
+import * as styles from '@/ui/styles/Home.css';
 import { GreeterExample } from '../domain/greeter';
 import { GoogleLoginButton, UserProfile, useAuth } from '@/domain/auth';
 

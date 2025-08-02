@@ -1,6 +1,6 @@
 import React, { useState, FormEvent } from 'react';
 import { sayHello } from '../action';
-import { Card, Button, Input, Text, ChatBubble, Loading, Stack, Tag } from '../../../components';
+import { Card, Button, Input, Text, ChatBubble, Loading, Stack, Tag } from '../../../ui/components';
 import * as styles from './GreeterExample.css';
 
 interface Message {

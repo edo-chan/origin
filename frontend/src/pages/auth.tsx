@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import * as styles from '../styles/Auth.css';
+import * as styles from '@/ui/styles/Auth.css';
 
 export default function Auth() {
   const [username, setUsername] = useState('');

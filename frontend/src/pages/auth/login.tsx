@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { GoogleLoginButton } from '@/domain/auth/components';
-import * as styles from '@/styles/Auth.css';
+import * as styles from '@/ui/styles/Auth.css';
 
 /**
  * Login page with Google OAuth

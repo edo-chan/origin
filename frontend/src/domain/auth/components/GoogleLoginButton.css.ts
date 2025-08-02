@@ -1,5 +1,5 @@
 import { style, keyframes } from '@vanilla-extract/css';
-import { theme } from '@/styles/theme.css';
+import { theme } from '@/ui/styles/theme.css';
 
 // Define keyframes animations
 const spinAnimation = keyframes({

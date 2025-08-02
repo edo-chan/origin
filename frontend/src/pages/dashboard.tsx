@@ -1,7 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import { ProtectedRoute, UserProfile, useAuth, useToken } from '@/domain/auth';
-import * as styles from '../styles/Home.css';
+import * as styles from '@/ui/styles/Home.css';
 
 export default function Dashboard() {
   return (

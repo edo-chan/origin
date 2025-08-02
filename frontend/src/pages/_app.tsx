@@ -3,8 +3,8 @@ import { Provider as JotaiProvider } from 'jotai';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
-import '../styles/global.css';
-import '../styles/kdramaTheme.css';
+import '@/ui/styles/global.css';
+import '@/ui/styles/kdramaTheme.css';
 import { 
   authStateAtom, 
   handleOAuthCallbackAtom, 
