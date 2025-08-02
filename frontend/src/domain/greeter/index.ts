@@ -2,7 +2,6 @@
 export * from './atoms';
 
 // Export services
-export * from './fetch';
 export * from './action';
 
 // Export hooks

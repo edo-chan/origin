@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(mv:*)",
@@ -48,7 +49,32 @@
       "Bash(cp:*)",
       "Bash(pkill:*)",
       "Bash(grep:*)",
-      "Bash(npm cache clean:*)"
+      "Bash(npm cache clean:*)",
+      "Bash(linear issue list:*)",
+      "WebFetch(domain:mcp.linear.app)",
+      "WebFetch(domain:linear.app)",
+      "Bash(claude mcp:*)",
+      "mcp__linear__list_teams",
+      "mcp__linear__create_issue",
+      "mcp__linear__list_issue_labels",
+      "mcp__linear__list_issue_statuses",
+      "Bash(sqlx migrate:*)",
+      "Bash(chmod:*)",
+      "Bash(rustc:*)",
+      "Bash(time cargo build:*)",
+      "Bash(SKIP_ENV_VALIDATION=true npm run build -- --no-lint)",
+      "Bash(time cargo check)",
+      "mcp__linear__list_issues",
+      "mcp__linear__update_issue",
+      "Bash(CARGO_MANIFEST_DIR=/Users/edwardchan/dev/origin/backend rust-gdb --batch --quiet -ex \"source ./build.rs\")",
+      "Bash(DOCKER_BUILDKIT=1 docker build --target planner -t test-planner .)",
+      "Bash(DOCKER_BUILDKIT=1 docker build --target planner -f backend/Dockerfile -t test-planner .)",
+      "Bash(./backend/build-optimized.sh:*)",
+      "Bash(sed:*)",
+      "Bash(DOCKER_BUILDKIT=1 docker build --target deps -f backend/Dockerfile -t test-deps .)",
+      "Bash(DOCKER_BUILDKIT=1 docker build -f backend/Dockerfile -t template-backend-optimized:latest .)",
+      "Bash(docker run:*)",
+      "Bash(openssl rand:*)"
     ],
     "deny": []
   }

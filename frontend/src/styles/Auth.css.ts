@@ -32,12 +32,54 @@ export const main = style({
   maxWidth: '500px',
 });
 
+export const loginCard = style({
+  background: colors.cardBg,
+  borderRadius: '12px',
+  padding: '2rem',
+  backdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+  width: '100%',
+  maxWidth: '400px',
+});
+
+export const header = style({
+  textAlign: 'center',
+  marginBottom: '2rem',
+});
+
 export const title = style({
   margin: 0,
   lineHeight: 1.15,
-  fontSize: '4rem',
+  fontSize: '2rem',
   textAlign: 'center',
   color: colors.text,
+  marginBottom: '0.5rem',
+});
+
+export const subtitle = style({
+  margin: 0,
+  fontSize: '1rem',
+  color: 'rgba(224, 224, 224, 0.7)',
+  textAlign: 'center',
+});
+
+export const errorAlert = style({
+  background: 'rgba(244, 67, 54, 0.1)',
+  border: '1px solid rgba(244, 67, 54, 0.3)',
+  borderRadius: '8px',
+  padding: '1rem',
+  marginBottom: '1rem',
+  color: '#ff6b6b',
+  fontSize: '0.9rem',
+  textAlign: 'center',
+});
+
+export const loginSection = style({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
 });
 
 export const form = style({
@@ -100,6 +142,13 @@ export const footer = style({
   display: 'flex',
   justifyContent: 'center',
   gap: '0.5rem',
+});
+
+export const footerText = style({
+  fontSize: '0.8rem',
+  color: 'rgba(224, 224, 224, 0.6)',
+  textAlign: 'center',
+  lineHeight: 1.4,
 });
 
 export const link = style({

@@ -35,12 +35,24 @@ docker_build('origin-envoy',
     ignore=['../../frontend/', '../../data/', '../../.git/']
 )
 
-# Custom command button for database migration
-cmd_button('migrate-db',
-           argv=['./migrate.sh'],
-           location=location.NAV,
-           icon_name='storage',
-           text='Migrate Database')
+# Database migration command buttons
+cmd_button('migrate-run',
+           argv=['./backend/migrate.sh', 'run'],
+           icon_name='play_arrow',
+           text='Run Migrations',
+           resource='postgres')
+
+cmd_button('migrate-revert',
+           argv=['./backend/migrate.sh', 'revert'],
+           icon_name='undo',
+           text='Revert Last Migration',
+           resource='postgres')
+
+cmd_button('migrate-reset',
+           argv=['./backend/migrate.sh', 'reset'],
+           icon_name='refresh',
+           text='Reset Database',
+           resource='postgres')
 
 # Print helpful message
 print("""

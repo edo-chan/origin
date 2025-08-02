@@ -5,7 +5,6 @@ fn compile_proto(
     proto: Vec<PathBuf>,
     proto_dir: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // Ensure proto/rust/gen directory exists
     let rust_out_dir = PathBuf::from("../proto/rust/gen");
     fs::create_dir_all(&rust_out_dir)?;
     
@@ -14,7 +13,6 @@ fn compile_proto(
         .build_server(true)
         .build_client(true)
         .out_dir("../proto/rust/gen")
-        .type_attribute(".", "#[derive(serde::Serialize, serde::Deserialize)]")
         .compile(
             &proto.iter().map(|p| p.as_path()).collect::<Vec<_>>(), 
             &[proto_dir, "../googleapis"]
@@ -27,19 +25,19 @@ fn compile_envoy_descriptor_set(
     manifest_dir: PathBuf,
     proto_dir: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // envoy descriptor - output directly to backend directory for envoy to use
     let static_out = manifest_dir.join("proto.pb");
     fs::create_dir_all(static_out.parent().unwrap())?;
     tonic_build::configure()
         .build_server(false)
         .build_client(false)
         .file_descriptor_set_path(&static_out)
+        .disable_package_emission()
         .compile(
             &all_proto_definitions.iter().map(|p| p.as_path()).collect::<Vec<_>>(), 
             &[proto_dir, "../googleapis"]
         )?;
     
-    // Automatically copy proto.pb to envoy directory for Docker builds
+    // Copy to envoy directory for Docker builds
     let envoy_proto_pb = manifest_dir.join("envoy/proto.pb");
     fs::create_dir_all(envoy_proto_pb.parent().unwrap())?;
     fs::copy(&static_out, &envoy_proto_pb)?;
@@ -53,7 +51,6 @@ fn compile_web(
     manifest_dir: PathBuf,
     proto_dir: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // Ensure proto/gen/web directory exists
     let web_out_dir = PathBuf::from("../proto/gen/web");
     fs::create_dir_all(&web_out_dir)?;
 
@@ -63,7 +60,7 @@ fn compile_web(
         return Ok(());
     }
     
-    // running ts protoc
+    // Run protoc for TypeScript generation
     let mut ts_args = vec![
         format!(
             "--plugin={}/node_modules/.bin/protoc-gen-ts_proto",
@@ -80,6 +77,7 @@ fn compile_web(
         ts_args.push(format!("{}", proto.display()));
     }
     ts_args.push("--experimental_allow_proto3_optional".to_string());
+    
     let output = Command::new("protoc").args(ts_args).output()?;
     if !output.status.success() {
         println!("cargo:warning=ts-protoc error: {}", output.status);
@@ -89,13 +87,18 @@ fn compile_web(
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("cargo:rerun-if-changed=../proto/*");
+    // More specific rerun conditions to avoid unnecessary rebuilds
+    println!("cargo:rerun-if-changed=../proto/greeter.proto");
+    println!("cargo:rerun-if-changed=../proto/auth.proto");
+    println!("cargo:rerun-if-changed=build.rs");
+    
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR")?);
     let proto_dir = manifest_dir.join("../proto");
 
     // Current proto definitions - simplified for this template
     let proto_definitions = vec![
         vec![proto_dir.join("greeter.proto")],
+        vec![proto_dir.join("auth.proto")],
     ];
 
     let mut all_proto_definitions = Vec::new();

@@ -2,36 +2,59 @@ import Head from 'next/head';
 import Link from 'next/link';
 import * as styles from '../styles/Home.css';
 import { GreeterExample } from '../domain/greeter';
+import { GoogleLoginButton, UserProfile, useAuth } from '@/domain/auth';
 
 export default function Home() {
+  const { isAuthenticated, user } = useAuth();
+
   return (
     <div className={styles.container}>
       <Head>
         <title>Template Project</title>
-        <meta name="description" content="Template project with NextJS, React, Vanilla Extract, Rust, and gRPC" />
+        <meta name="description" content="Template project with NextJS, React, Vanilla Extract, Rust, and gRPC with Google OAuth" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
+        {isAuthenticated && (
+          <div style={{ 
+            position: 'absolute', 
+            top: '1rem', 
+            right: '1rem' 
+          }}>
+            <UserProfile />
+          </div>
+        )}
+
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
         <p className={styles.description}>
           This is a template project with NextJS, React, Vanilla Extract, Rust, and gRPC
+          {isAuthenticated && <><br />Hello, {user?.name}! You&apos;re signed in.</>}
         </p>
+
+        {!isAuthenticated && (
+          <div style={{ marginBottom: '2rem' }}>
+            <GoogleLoginButton 
+              text="Sign in with Google" 
+              redirectUri={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
+            />
+          </div>
+        )}
 
         <GreeterExample />
 
         <div className={styles.grid}>
-          <Link href="/auth" className={styles.card}>
+          <Link href="/auth/login" className={styles.card}>
             <h2 className={styles.cardTitle}>Login &rarr;</h2>
-            <p className={styles.cardText}>Go to the K-pop styled login page.</p>
+            <p className={styles.cardText}>Go to the Google OAuth login page.</p>
           </Link>
 
           <Link href="/dashboard" className={styles.card}>
             <h2 className={styles.cardTitle}>Dashboard &rarr;</h2>
-            <p className={styles.cardText}>Go to the dashboard page.</p>
+            <p className={styles.cardText}>Go to the protected dashboard page.</p>
           </Link>
 
           <a href="https://nextjs.org/docs" className={styles.card}>

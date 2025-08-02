@@ -1,5 +1,5 @@
 import { style, styleVariants } from '@vanilla-extract/css';
-import { themeContract } from '../../styles/theme.css';
+import { themeContract } from '@/styles/theme.css';
 
 export const chipBase = style({
   display: 'inline-flex',

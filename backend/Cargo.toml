@@ -3,29 +3,71 @@ name = "template"
 version = "0.1.0"
 edition = "2021"
 
+# Optimize build performance
+[profile.dev]
+opt-level = 1          # Basic optimizations for dependencies
+overflow-checks = false # Disable overflow checks in dev
+strip = "debuginfo"   # Remove debug info to reduce binary size
+
+[profile.dev.package."*"]
+opt-level = 3          # Full optimization for dependencies
+debug = false          # No debug info for dependencies
+
+[profile.release]
+lto = "thin"           # Link-time optimization
+codegen-units = 1      # Better optimization at cost of compile parallelism
+strip = true           # Strip symbols
+panic = "abort"        # Smaller binaries
+
+# Enable features to reduce dependencies
+[profile.dev.build-override]
+opt-level = 3
+
 [dependencies]
-tonic = "0.11.0"
-prost = "0.12.3"
-tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros", "sync", "time"] }
-futures = "0.3.30"
+# Core gRPC dependencies with minimal features
+tonic = { version = "0.11.0", default-features = false, features = ["transport", "codegen", "prost"] }
+prost = { version = "0.12.3", default-features = false }
+prost-types = { version = "0.12.3", default-features = false }
+
+# Async runtime - only enable needed features
+tokio = { version = "1.36.0", default-features = false, features = ["rt-multi-thread", "macros", "sync", "time", "net"] }
+futures = { version = "0.3.30", default-features = false, features = ["std"] }
 async-trait = "0.1.77"
-tower = "0.4.13"
-tower-http = { version = "0.4.0", features = ["cors"] }
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.114"
-sqlx = { version = "0.7.3", features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "chrono", "json", "migrate"] }
-chrono = { version = "0.4.35", features = ["serde"] }
-dotenv = "0.15.0"
-redis = { version = "0.23.0", features = ["tokio-comp"] }
-jsonwebtoken = "8.3.0"
-oauth2 = "4.4.2"
-reqwest = { version = "0.11.22", features = ["json"] }
-uuid = { version = "1.4.1", features = ["v4", "serde"] }
-argon2 = "0.5.2"
-rand = "0.8.5"
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
-anyhow = "1.0"
+
+# HTTP stack with minimal features
+tower = { version = "0.4.13", default-features = false, features = ["util"] }
+tower-http = { version = "0.4.0", default-features = false, features = ["cors"] }
+
+# Serialization
+serde = { version = "1.0.197", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.114", default-features = false }
+
+# Database with only required features
+sqlx = { version = "0.7.3", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "chrono", "json", "migrate", "macros"] }
+chrono = { version = "0.4.35", default-features = false, features = ["serde", "std"] }
+
+# Configuration and caching
+dotenv = { version = "0.15.0", default-features = false }
+redis = { version = "0.24.0", default-features = false, features = ["tokio-comp"] }
+deadpool-redis = { version = "0.14.0", default-features = false, features = ["rt_tokio_1"] }
+
+# Authentication
+jsonwebtoken = { version = "8.3.0", default-features = false }
+oauth2 = { version = "4.4.2", default-features = false, features = ["reqwest"] }
+reqwest = { version = "0.11.22", default-features = false, features = ["json", "rustls-tls"] }
+uuid = { version = "1.4.1", default-features = false, features = ["v4", "serde"] }
+argon2 = { version = "0.5.2", default-features = false, features = ["std"] }
+rand = { version = "0.8.5", default-features = false, features = ["std", "std_rng"] }
+
+# Logging with minimal features
+tracing = { version = "0.1", default-features = false, features = ["std"] }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "json", "fmt"] }
+anyhow = { version = "1.0", default-features = false, features = ["std"] }
 
 [build-dependencies]
-tonic-build = "0.11.0"
+tonic-build = { version = "0.11.0", default-features = false, features = ["prost"] }
+
+# Optimize build script dependencies
+[build-dependencies.prost-build]
+version = "0.12.3"
+default-features = false

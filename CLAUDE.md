@@ -2,6 +2,29 @@
 
 This project is a full-stack template with Rust backend and Next.js frontend. Follow these guidelines when working on the codebase.
 
+## ⚠️ CRITICAL: Generated Files
+
+**DO NOT MODIFY ANY GENERATED FILES**
+
+Generated files include:
+- `proto/gen/` - TypeScript types generated from Protocol Buffers
+- `proto/rust/gen/` - Rust code generated from Protocol Buffers  
+- Any file with `// @generated` or similar comments
+- Files in `target/` directories
+- `node_modules/` contents
+- `dist/` or build output directories
+
+**Why this matters:**
+- Generated files are overwritten during builds
+- Modifications will be lost and cause build conflicts
+- Changes should be made to source `.proto` files instead
+- Generated code is automatically kept in sync with schema definitions
+
+**To modify API schemas:**
+1. Edit the source `.proto` files in `proto/` directory
+2. Run `cargo build` to regenerate Rust code and Envoy descriptors
+3. Frontend TypeScript types are automatically updated
+
 ## Backend (Rust)
 
 ### Architecture

@@ -1,7 +1,8 @@
 use tonic::{Request, Response, Status};
 use tracing::{info, error, instrument};
+use crate::gen::greeter::greeter_service_server::GreeterService;
+use crate::gen::greeter::{HelloRequest, HelloResponse};
 use crate::model::greeting::GreetingRepository;
-use crate::gen::{greeter_service_server::GreeterService, HelloRequest, HelloResponse};
 
 #[derive(Debug)]
 pub struct GreeterHandler {

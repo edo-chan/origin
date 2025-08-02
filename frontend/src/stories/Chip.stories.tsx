@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
+import type { Meta, StoryObj } from '@storybook/react';
 import { Chip } from '../components/Chip';
 
 const meta: Meta<typeof Chip> = {

@@ -1,25 +1,39 @@
+# Cargo configuration for optimized builds
 [build]
-# Use faster linker (disabled for macOS compatibility)
-# rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+# Use all available cores (auto-detect)
+# jobs = 0 is not valid, removing this line
 
+# Use sparse registry protocol for faster dependency resolution
+[registries.crates-io]
+protocol = "sparse"
+
+# Network optimizations
+[net]
+git-fetch-with-cli = true
+
+# Target-specific optimizations
 [target.x86_64-unknown-linux-gnu]
-# Enable parallel codegen and optimizations
 rustflags = [
     "-C", "link-arg=-fuse-ld=lld",
-    "-C", "codegen-units=1",
-    "-C", "panic=abort",
+    "-C", "codegen-units=1",     # Better optimization for release builds
+    "-C", "target-cpu=generic",  # Portable but optimized
 ]
 
-[profile.release]
-# Optimize for speed and size
-opt-level = 3
-lto = true
-codegen-units = 1
-panic = "abort"
-strip = true
+[target.x86_64-apple-darwin] 
+rustflags = [
+    "-C", "codegen-units=16",    # More parallel codegen for dev builds
+]
 
-[profile.dev]
-# Faster compilation for development
-opt-level = 0
-debug = true
-strip = false
+[target.aarch64-apple-darwin]
+rustflags = [
+    "-C", "codegen-units=16",    # More parallel codegen for dev builds  
+]
+
+# Environment variables for build optimization
+[env]
+# Enable incremental compilation for development
+CARGO_INCREMENTAL = "1"
+# Use sparse registry protocol
+CARGO_REGISTRIES_CRATES_IO_PROTOCOL = "sparse"
+# Optimize git fetching
+CARGO_NET_GIT_FETCH_WITH_CLI = "true"

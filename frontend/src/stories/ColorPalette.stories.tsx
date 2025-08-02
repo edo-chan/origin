@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
+import type { Meta, StoryObj } from '@storybook/react';
 import { ColorPalette } from '../components/ColorPalette';
 
 const meta: Meta<typeof ColorPalette> = {

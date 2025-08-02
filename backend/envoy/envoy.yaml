@@ -40,11 +40,23 @@ static_resources:
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
               path: "/dev/stdout"
-              format: |
-                [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%"
-                %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT%
-                %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% "%REQ(X-FORWARDED-FOR)%"
-                "%REQ(USER-AGENT)%" "%REQ(X-REQUEST-ID)%" "%REQ(:AUTHORITY)%" "%UPSTREAM_HOST%"
+              json_format:
+                timestamp: "%START_TIME%"
+                method: "%REQ(:METHOD)%"
+                path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+                protocol: "%PROTOCOL%"
+                response_code: "%RESPONSE_CODE%"
+                response_flags: "%RESPONSE_FLAGS%"
+                bytes_received: "%BYTES_RECEIVED%"
+                bytes_sent: "%BYTES_SENT%"
+                duration_ms: "%DURATION%"
+                upstream_service_time: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+                x_forwarded_for: "%REQ(X-FORWARDED-FOR)%"
+                user_agent: "%REQ(USER-AGENT)%"
+                request_id: "%REQ(X-REQUEST-ID)%"
+                authority: "%REQ(:AUTHORITY)%"
+                upstream_host: "%UPSTREAM_HOST%"
+                service: "envoy-proxy"
           http_filters:
           - name: envoy.filters.http.cors
             typed_config:
@@ -53,7 +65,7 @@ static_resources:
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
               proto_descriptor: "/etc/envoy/proto.pb"
-              services: ["service.GreeterService"]
+              services: ["greeter.GreeterService", "auth.AuthService"]
               auto_mapping: true
               print_options:
                 add_whitespace: true

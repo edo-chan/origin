@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
+import type { Meta, StoryObj } from '@storybook/react';
 import { SingleSlider as Slider } from '../components';
 import { useState } from 'react';
 

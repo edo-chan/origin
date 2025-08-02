@@ -3,14 +3,28 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Install build dependencies for native modules
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    protobuf \
+    py3-pip
+
+# Copy package files and .npmrc
 COPY frontend/package*.json ./
+COPY frontend/.npmrc ./
 
-# Install dependencies
-RUN npm install
+# Set npm configuration for Alpine build
+ENV npm_config_target_platform=linux
+ENV npm_config_target_arch=arm64
+ENV npm_config_python=/usr/bin/python3
 
-# Install protobuf compiler
-RUN apk add --no-cache protobuf
+# Install dependencies using npm ci for faster, reliable builds
+RUN npm ci --legacy-peer-deps --ignore-scripts
+
+# Rebuild native modules for the current platform
+RUN npm rebuild
 
 # Copy the frontend code
 COPY frontend/ .

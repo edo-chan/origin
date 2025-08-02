@@ -1,101 +1,108 @@
-# Use cargo-chef for better dependency caching
-FROM rust:1.88 as chef
-RUN cargo install cargo-chef
+# Multi-stage build for optimized Docker image
+FROM rust:1.88-slim as base
 
-# Plan stage - analyze dependencies
-FROM chef as planner
-WORKDIR /usr/src/app
-
-# Install system dependencies first (this layer rarely changes)
+# Install all build dependencies in a single layer with cleanup
 RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
     protobuf-compiler \
     curl \
     lld \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Node.js and npm (this layer rarely changes)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy project files for dependency analysis
-COPY backend/Cargo.toml backend/Cargo.lock ./backend/
-COPY backend/build.rs ./backend/
-COPY backend/src ./backend/src
-COPY proto ./proto
-COPY googleapis ./googleapis
-COPY frontend/package*.json ./frontend/
-
-WORKDIR /usr/src/app/backend
-RUN cargo chef prepare --recipe-path recipe.json
-
-# Build dependencies stage
-FROM chef as dependencies
-WORKDIR /usr/src/app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    protobuf-compiler \
-    curl \
-    lld \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Node.js and npm
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy proto files, googleapis, and frontend package.json (needed for build.rs)
-COPY proto ./proto
-COPY googleapis ./googleapis
-COPY frontend/package*.json ./frontend/
-
-# Copy the recipe and build dependencies
-COPY --from=planner /usr/src/app/backend/recipe.json ./backend/recipe.json
-WORKDIR /usr/src/app/backend
-RUN CARGO_BUILD_JOBS=$(nproc) cargo chef cook --release --recipe-path recipe.json
-
-# Build stage - build the actual application
-FROM dependencies as builder
-
-# Copy the source code
-COPY backend/src ./src
-COPY backend/Cargo.toml backend/Cargo.lock ./
-COPY backend/build.rs ./
-
-# Build the application (dependencies are already built)
-# Use all available CPU cores for compilation
-RUN CARGO_BUILD_JOBS=$(nproc) cargo build --release
-
-# Runtime stage - minimal image for running the application
-FROM debian:bookworm-slim as runtime
-
-# Install only runtime dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    ca-certificates \
+    clang \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Create a non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Install cargo-chef for dependency caching
+RUN cargo install cargo-chef --locked
 
-# Copy the binary from builder stage
-COPY --from=builder /usr/src/app/backend/target/release/template /usr/local/bin/template
+# Configure Rust for optimal builds
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true \
+    CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse \
+    RUSTFLAGS="-C link-arg=-fuse-ld=lld"
 
-# Change ownership to appuser
-RUN chown appuser:appuser /usr/local/bin/template
+# Dependency planner stage
+FROM base as planner
+WORKDIR /app
 
-# Switch to non-root user
-USER appuser
+# Copy only manifest files for dependency analysis
+COPY backend/Cargo.toml backend/Cargo.lock ./
+COPY backend/build.rs ./
 
-# Expose ports
-EXPOSE 50051 8081
+# Create minimal source structure for cargo-chef
+RUN mkdir src && echo "fn main() {}" > src/main.rs
 
-# Set environment variables for better performance
-ENV RUST_LOG=info
-ENV RUST_BACKTRACE=1
+# Create minimal proto structure for build.rs
+RUN mkdir -p ../proto && \
+    echo 'syntax = "proto3"; package greeter;' > ../proto/greeter.proto && \
+    echo 'syntax = "proto3"; package auth;' > ../proto/auth.proto
 
+# Create minimal googleapis structure
+RUN mkdir -p ../googleapis/google/api && \
+    touch ../googleapis/google/api/annotations.proto ../googleapis/google/api/http.proto
+
+# Create minimal frontend package.json for build.rs
+RUN mkdir -p ../frontend && echo '{"name":"frontend"}' > ../frontend/package.json
+
+# Generate dependency recipe
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Dependencies build stage
+FROM base as deps
+WORKDIR /app
+
+# Copy recipe from planner
+COPY --from=planner /app/recipe.json ./
+
+# Create same minimal structure as planner
+RUN mkdir -p ../proto ../googleapis/google/api ../frontend && \
+    echo 'syntax = "proto3"; package greeter;' > ../proto/greeter.proto && \
+    echo 'syntax = "proto3"; package auth;' > ../proto/auth.proto && \
+    touch ../googleapis/google/api/annotations.proto ../googleapis/google/api/http.proto && \
+    echo '{"name":"frontend"}' > ../frontend/package.json
+
+# Build dependencies with cache mounts
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=target \
+    cargo chef cook --release --recipe-path recipe.json
+
+# Final build stage
+FROM deps as builder
+WORKDIR /app
+
+# Copy source code
+COPY backend/src ./src
+COPY backend/Cargo.toml backend/Cargo.lock backend/build.rs ./
+
+# Copy complete proto files and dependencies for build
+COPY proto ../proto
+COPY googleapis ../googleapis
+COPY frontend/package.json ../frontend/
+
+# Build application with cache mounts and copy binary out
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=target \
+    cargo build --release --bin template && \
+    cp target/release/template /usr/local/bin/template && \
+    strip /usr/local/bin/template
+
+# Runtime stage - minimal distroless image
+FROM gcr.io/distroless/cc-debian12
+
+# Copy the stripped binary from builder
+COPY --from=builder /usr/local/bin/template /usr/local/bin/template
+
+# Set optimal runtime environment
+ENV RUST_LOG=info \
+    RUST_BACKTRACE=0 \
+    MALLOC_ARENA_MAX=2
+
+# Expose gRPC port
+EXPOSE 50051
+
+# Use non-root user for security
+USER 65532:65532
 
 # Run the application
-CMD ["template"]
+ENTRYPOINT ["/usr/local/bin/template"]

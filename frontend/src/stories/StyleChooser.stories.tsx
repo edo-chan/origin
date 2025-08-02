@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
+import type { Meta, StoryObj } from '@storybook/react';
 import { Button, ButtonGroup, Card, ChatBubble, Dropdown, Input, Text, Tag, Chip, ColorPalette, Loading, Slider, Switch, Tooltip, Table, Stack } from '../components';
 import { useTheme } from '../styles/ThemeContext';
 

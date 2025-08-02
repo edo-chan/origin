@@ -1,36 +1,102 @@
-# Rust build artifacts
+# Rust build artifacts (critical for build speed)
 target/
 **/*.rs.bk
-Cargo.lock
+**/target/
+**/*.pdb
 
-# IDE files
+# Cache directories
+.cargo/
+**/.cargo/
+
+# IDE files (large and unnecessary)
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
+.vim/
+.emacs.d/
 
-# OS files
+# OS files (can be large)
 .DS_Store
 Thumbs.db
+*.tmp
+*.temp
+.Trash-*/
 
-# Git
+# Git (largest directory typically)
 .git/
 .gitignore
+.gitattributes
+.gitmodules
 
-# Documentation
+# Documentation (unnecessary for builds)
 README.md
 *.md
+docs/
+CHANGELOG*
+LICENSE*
+CONTRIBUTING*
 
-# Logs
+# Logs and runtime files
 *.log
+*.out
+*.err
+.log/
+logs/
 
-# Environment files
-.env
-.env.local
+# Environment and config files (security)
+.env*
+*.env
+config.local.*
+secrets/
+.secrets/
 
-# Test files
+# Test files and coverage
 tests/
+test/
+**/*_test.rs
+**/*_tests.rs
+coverage/
+.coverage/
+**/*.coverage
 
-# Development files
+# Development and build tools
 .dockerignore
 Dockerfile.*
+docker-compose*.yml
+.github/
+.circleci/
+.travis.yml
+.gitlab-ci.yml
+Jenkinsfile
+Makefile.local
+*.mk
+
+# Node.js artifacts (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# Temporary and cache files
+tmp/
+temp/
+.tmp/
+.cache/
+**/.cache/
+.build/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Backup files
+*.bak
+*.backup
+*~
+*.orig

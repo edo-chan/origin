@@ -7,8 +7,13 @@ use tracing::{info, error, instrument};
 
 use sqlx::PgPool;
 use template::handler::greeter::GreeterHandler;
+use template::handler::auth::AuthServiceImpl;
 use template::model::greeting::GreetingRepository;
-use template::gen::greeter_service_server::GreeterServiceServer;
+use template::model::user::UserRepository;
+use template::model::auth::{JwtManager, SessionManager};
+use template::adapter::google_oauth::GoogleOAuthClient;
+use template::gen::greeter::greeter_service_server::GreeterServiceServer;
+use template::gen::auth::auth_service_server::AuthServiceServer;
 use template::logging;
 
 #[tokio::main]
@@ -34,8 +39,37 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("Database connection established");
 
     // Create the greeter handler with repository access
-    let greeting_repo = GreetingRepository::new(pool);
+    let greeting_repo = GreetingRepository::new(pool.clone());
     let greeter = GreeterHandler::new(greeting_repo);
+
+    // Create auth service dependencies
+    let oauth_client = GoogleOAuthClient::from_env()
+        .map_err(|e| {
+            error!("Failed to create OAuth client: {}", e);
+            e
+        })?;
+    
+    let jwt_manager = JwtManager::from_env()
+        .map_err(|e| {
+            error!("Failed to create JWT manager: {}", e);
+            e
+        })?;
+    
+    let session_manager = SessionManager::from_env()
+        .map_err(|e| {
+            error!("Failed to create session manager: {}", e);
+            e
+        })?;
+    
+    let user_repository = UserRepository::new(pool.clone());
+    
+    // Create the auth service handler
+    let auth_service = AuthServiceImpl::new(
+        oauth_client,
+        jwt_manager,
+        session_manager,
+        user_repository,
+    );
 
     // Configure CORS middleware
     let cors = CorsLayer::new()
@@ -47,6 +81,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let grpc_server = Server::builder()
         .layer(ServiceBuilder::new().layer(cors))
         .add_service(GreeterServiceServer::new(greeter))
+        .add_service(AuthServiceServer::new(auth_service))
         .serve(grpc_addr);
 
     info!("gRPC server listening on {}", grpc_addr);
