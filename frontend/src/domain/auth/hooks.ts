@@ -20,7 +20,6 @@ import {
   type AuthError
 } from './atoms';
 import { tokenManager, type TokenValidationResult } from './tokenManager';
-import { authService } from './service';
 import * as authActions from './action';
 import type { 
   InitiateOAuthRequest,
@@ -68,26 +67,15 @@ export function useAuth() {
    * Initiate Google OAuth flow
    */
   const login = useCallback(async (redirectUri?: string) => {
-    console.log('🎯 Auth Hook: Login called', { redirectUri });
-    
     try {
-      console.log('⏳ Auth Hook: Setting loading state');
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      
-      console.info('Auth Action', {
-        action: 'login_initiated',
-        redirectUri,
-        timestamp: new Date().toISOString()
-      });
 
       const request: InitiateOAuthRequest = {
         redirectUri: redirectUri || `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
         deviceName: typeof navigator !== 'undefined' ? `${navigator.platform} - ${navigator.userAgent.split(' ')[0]}` : 'Unknown Device'
       };
 
-      console.log('📤 Auth Hook: Calling initiateOAuth with request:', request);
       const response = await authActions.initiateOAuth(request);
-      console.log('📥 Auth Hook: Got response from initiateOAuth:', response);
       
       setInitializeOAuth({
         authorizationUrl: response.authUrl,
@@ -95,17 +83,12 @@ export function useAuth() {
         codeChallenge: '' // Not provided by current proto
       });
 
-      console.log('🌐 Auth Hook: About to redirect to:', response.authUrl);
       // Redirect to Google OAuth
       if (typeof window !== 'undefined') {
         window.location.href = response.authUrl;
-      } else {
-        console.warn('🚨 Auth Hook: Window not available, cannot redirect');
       }
       
     } catch (error) {
-      console.error('💥 Auth Hook: Login failed with error:', error);
-      
       const authError: AuthError = {
         code: 10, // AUTH_ERROR_OAUTH_SERVICE_ERROR
         message: error instanceof Error ? error.message : 'OAuth initialization failed',
@@ -113,19 +96,11 @@ export function useAuth() {
         requestId: generateUUID()
       };
 
-      console.log('❌ Auth Hook: Setting error state:', authError);
       setAuthState(prev => ({
         ...prev,
         isLoading: false,
         error: authError
       }));
-
-      console.error('Auth Action', {
-        action: 'login_failed',
-        error: authError.message,
-        requestId: authError.requestId,
-        timestamp: new Date().toISOString()
-      });
     }
   }, [setAuthState, setInitializeOAuth]);
 
@@ -136,12 +111,6 @@ export function useAuth() {
     try {
       setHandleOAuthCallback({ isCallback: true });
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-
-      console.info('Auth Action', {
-        action: 'handle_callback_started',
-        state,
-        timestamp: new Date().toISOString()
-      });
 
       const deviceInfo = {
         browser: navigator.userAgent.split(')')[0].split('(')[1] || 'Unknown',
@@ -185,13 +154,6 @@ export function useAuth() {
         isLoading: false,
         error: authError
       }));
-
-      console.error('Auth Action', {
-        action: 'handle_callback_failed',
-        error: authError.message,
-        requestId: authError.requestId,
-        timestamp: new Date().toISOString()
-      });
     }
   }, [setAuthState, setHandleOAuthCallback, setLoginSuccess, router]);
 
@@ -200,10 +162,6 @@ export function useAuth() {
    */
   const refreshAccessToken = useCallback(async () => {
     if (!refreshToken) {
-      console.warn('Auth Action', {
-        action: 'refresh_token_missing',
-        timestamp: new Date().toISOString()
-      });
       return false;
     }
 
@@ -234,12 +192,6 @@ export function useAuth() {
 
       return false;
     } catch (error) {
-      console.error('Auth Action', {
-        action: 'refresh_token_failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
-
       // If refresh fails, logout user
       setLogout('refresh_failed');
       return false;
@@ -257,11 +209,7 @@ export function useAuth() {
         });
       }
     } catch (error) {
-      console.warn('Auth Action', {
-        action: 'logout_api_failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
+      // Silently handle logout API failures
     } finally {
       setLogout('user_initiated');
       await router.push('/');
@@ -279,32 +227,8 @@ export function useAuth() {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true }));
 
-      const request: UpdateUserProfileRequest = {
-        name: updates.name || '',
-        givenName: updates.givenName || '',
-        familyName: updates.familyName || '',
-        pictureUrl: updates.pictureUrl || '',
-        locale: updates.locale || '',
-        preferences: updates.preferences || ''
-      };
-
-      const response = await authService.updateUserProfile(request);
-      
-      if (response.user) {
-        setAuthState(prev => ({
-          ...prev,
-          user: response.user || null,
-          isLoading: false
-        }));
-
-        console.info('Auth Action', {
-          action: 'profile_updated',
-          userId: response.user.id,
-          timestamp: new Date().toISOString()
-        });
-      }
-
-      return response.user;
+      // TODO: Implement profile update when backend API is available
+      throw new Error('Profile update not implemented');
     } catch (error) {
       setAuthState(prev => ({
         ...prev,
@@ -333,12 +257,6 @@ export function useAuth() {
    */
   useEffect(() => {
     if (isExpired && authState.isAuthenticated) {
-      console.info('Auth Effect', {
-        action: 'token_expired_detected',
-        userId: authState.user?.id,
-        timestamp: new Date().toISOString()
-      });
-
       if (refreshToken) {
         refreshAccessToken();
       } else {

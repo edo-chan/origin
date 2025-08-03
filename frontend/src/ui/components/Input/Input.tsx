@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Label from '@radix-ui/react-label';
 import { inputBase, inputContainer, inputLabel, inputLabelError, inputErrorMessage, sizeVariants, variantStyles, errorStyles } from './Input.css';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -40,12 +41,12 @@ export const Input: React.FC<InputProps> = ({
   return (
     <div className={containerClasses}>
       {label && (
-        <label 
+        <Label.Root 
           htmlFor={inputId}
           className={`${inputLabel} ${error ? inputLabelError : ''}`}
         >
           {label}
-        </label>
+        </Label.Root>
       )}
       <input 
         id={inputId}

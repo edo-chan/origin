@@ -1,5 +1,15 @@
 import React from 'react';
-import { AuthErrorMessageProps, AuthError } from '../../../types/auth';
+import { AuthError, AuthErrorCode } from '../../../domain/auth/atoms';
+
+// AuthErrorMessage component props interface
+export interface AuthErrorMessageProps extends React.HTMLAttributes<HTMLDivElement> {
+  error: AuthError | string;
+  showRetry?: boolean;
+  onRetry?: () => void;
+  dismissible?: boolean;
+  onDismiss?: () => void;
+}
+
 import {
   authErrorContainer,
   errorContent,
@@ -85,13 +95,21 @@ export const AuthErrorMessage: React.FC<AuthErrorMessageProps> = ({
   const getErrorTitle = (): string => {
     if (errorObj) {
       switch (errorObj.code) {
-        case 'AUTH_ERROR':
-        case 'OAUTH_ERROR':
+        case AuthErrorCode.INVALID_TOKEN:
+        case AuthErrorCode.TOKEN_EXPIRED:
+        case AuthErrorCode.INVALID_REFRESH_TOKEN:
+          return 'Authentication Expired';
+        case AuthErrorCode.INVALID_CODE:
+        case AuthErrorCode.OAUTH_SERVICE_ERROR:
           return 'Authentication Failed';
-        case 'NETWORK_ERROR':
+        case AuthErrorCode.NETWORK_ERROR:
           return 'Connection Error';
-        case 'TIMEOUT_ERROR':
-          return 'Request Timeout';
+        case AuthErrorCode.INVALID_CREDENTIALS:
+        case AuthErrorCode.USER_NOT_FOUND:
+          return 'Invalid Credentials';
+        case AuthErrorCode.SESSION_NOT_FOUND:
+        case AuthErrorCode.SESSION_EXPIRED:
+          return 'Session Expired';
         default:
           return 'Authentication Error';
       }
@@ -100,25 +118,10 @@ export const AuthErrorMessage: React.FC<AuthErrorMessageProps> = ({
   };
 
   const handleRetry = () => {
-    console.info('Auth Error Retry', {
-      action: 'error_retry',
-      component: 'AuthErrorMessage',
-      errorCode: errorObj?.code || 'unknown',
-      errorMessage: errorString,
-      timestamp: new Date().toISOString(),
-    });
-    
     onRetry?.();
   };
 
   const handleDismiss = () => {
-    console.info('Auth Error Dismiss', {
-      action: 'error_dismiss',
-      component: 'AuthErrorMessage',
-      errorCode: errorObj?.code || 'unknown',
-      timestamp: new Date().toISOString(),
-    });
-    
     onDismiss?.();
   };
 

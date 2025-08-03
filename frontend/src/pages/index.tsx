@@ -2,7 +2,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import * as styles from '@/ui/styles/Home.css';
 import { GreeterExample } from '../domain/greeter';
-import { GoogleLoginButton, UserProfile, useAuth } from '@/domain/auth';
+import { UserProfile, useAuth } from '@/domain/auth';
+import { Stack } from '@/ui/components/Stack';
 
 export default function Home() {
   const { isAuthenticated, user } = useAuth();
@@ -36,20 +37,24 @@ export default function Home() {
         </p>
 
         {!isAuthenticated && (
-          <div style={{ marginBottom: '2rem' }}>
-            <GoogleLoginButton 
-              text="Sign in with Google" 
-              redirectUri={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
-            />
-          </div>
+          <Stack gap="md" style={{ marginBottom: '2rem' }}>
+            <Link href="/auth/otp" className={styles.card} style={{ 
+              display: 'inline-block', 
+              textDecoration: 'none',
+              textAlign: 'center',
+              padding: '1rem 2rem'
+            }}>
+              {"Sign In"}
+            </Link>
+          </Stack>
         )}
 
         <GreeterExample />
 
         <div className={styles.grid}>
-          <Link href="/auth/login" className={styles.card}>
-            <h2 className={styles.cardTitle}>Login &rarr;</h2>
-            <p className={styles.cardText}>Go to the Google OAuth login page.</p>
+          <Link href="/auth/otp" className={styles.card}>
+            <h2 className={styles.cardTitle}>Sign In &rarr;</h2>
+            <p className={styles.cardText}>Sign in with email or Google OAuth.</p>
           </Link>
 
           <Link href="/dashboard" className={styles.card}>

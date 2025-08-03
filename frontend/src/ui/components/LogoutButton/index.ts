@@ -1,2 +1,1 @@
-export { LogoutButton } from './LogoutButton';
-export type { LogoutButtonProps } from '../../../types/auth';
+export { LogoutButton, type LogoutButtonProps } from './LogoutButton';

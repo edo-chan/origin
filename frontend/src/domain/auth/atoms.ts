@@ -12,7 +12,7 @@ type Session = UserSession;
 type HandleOAuthCallbackResponse = CompleteOAuthResponse;
 
 // Define AuthErrorCode enum since it's not in proto
-enum AuthErrorCode {
+export enum AuthErrorCode {
   UNKNOWN = 0,
   INVALID_TOKEN = 1,
   INVALID_CODE = 2,
@@ -100,13 +100,6 @@ export const authStateAtom = atomWithStorage<AuthState>(AUTH_STORAGE_KEY, initia
       // Validate token expiration on load
       const now = Date.now();
       if (parsed.tokenExpiresAt && parsed.tokenExpiresAt < now) {
-        console.info('Auth State', {
-          action: 'token_expired_on_load',
-          expiresAt: new Date(parsed.tokenExpiresAt).toISOString(),
-          currentTime: new Date(now).toISOString(),
-          timestamp: new Date().toISOString()
-        });
-        
         // Clear expired tokens but keep user info for refresh attempt
         return {
           ...parsed,
@@ -122,11 +115,6 @@ export const authStateAtom = atomWithStorage<AuthState>(AUTH_STORAGE_KEY, initia
       
       return parsed;
     } catch (error) {
-      console.error('Auth Storage Error', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        action: 'load_auth_state',
-        timestamp: new Date().toISOString()
-      });
       return defaultValue;
     }
   },
@@ -143,11 +131,7 @@ export const authStateAtom = atomWithStorage<AuthState>(AUTH_STORAGE_KEY, initia
       
       localStorage.setItem(key, JSON.stringify(toStore));
     } catch (error) {
-      console.error('Auth Storage Error', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        action: 'save_auth_state',
-        timestamp: new Date().toISOString()
-      });
+      // Silently fail and continue
     }
   },
   removeItem: (key) => {
@@ -179,10 +163,7 @@ export const refreshTokenAtom = atomWithStorage<string | null>(REFRESH_TOKEN_STO
         sessionStorage.removeItem(key);
       }
     } catch (error) {
-      console.error('Refresh Token Storage Error', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
+      // Silently fail and continue
     }
   },
   removeItem: (key) => {
@@ -203,13 +184,6 @@ export const userAtom = atom(
       ...currentState,
       user,
       lastActivity: Date.now()
-    });
-    
-    console.info('Auth State', {
-      action: user ? 'user_updated' : 'user_cleared',
-      userId: user?.id || null,
-      email: user?.email || null,
-      timestamp: new Date().toISOString()
     });
   }
 );
@@ -272,16 +246,6 @@ export const authErrorAtom = atom(
       ...currentState,
       error
     });
-    
-    if (error) {
-      console.error('Auth Error', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        requestId: error.requestId,
-        timestamp: new Date(error.timestamp).toISOString()
-      });
-    }
   }
 );
 
@@ -289,14 +253,6 @@ export const authErrorAtom = atom(
 export const loginSuccessAtom = atom(
   null,
   (get, set, response: HandleOAuthCallbackResponse) => {
-    console.info('Auth Action', {
-      action: 'login_success',
-      userId: response.user?.id,
-      email: response.user?.email,
-      isNewUser: response.isNewUser,
-      timestamp: new Date().toISOString()
-    });
-
     // Update all auth state
     set(authStateAtom, {
       user: response.user || null,
@@ -323,13 +279,6 @@ export const loginSuccessAtom = atom(
 export const logoutAtom = atom(
   null,
   (get, set, reason?: string) => {
-    console.info('Auth Action', {
-      action: 'logout',
-      userId: get(authStateAtom).user?.id || null,
-      reason: reason || 'user_initiated',
-      timestamp: new Date().toISOString()
-    });
-
     // Clear all auth state
     set(authStateAtom, {
       ...initialAuthState,
@@ -347,13 +296,6 @@ export const logoutAtom = atom(
 export const updateTokensAtom = atom(
   null,
   (get, set, tokens: { accessToken: string; refreshToken?: string; expiresAt: number }) => {
-    console.debug('Auth Action', {
-      action: 'tokens_updated',
-      userId: get(authStateAtom).user?.id || null,
-      expiresAt: new Date(tokens.expiresAt * 1000).toISOString(),
-      timestamp: new Date().toISOString()
-    });
-
     const currentState = get(authStateAtom);
     set(authStateAtom, {
       ...currentState,
@@ -378,12 +320,6 @@ export const initializeOAuthAtom = atom(
     state: string;
     codeChallenge: string;
   }) => {
-    console.info('OAuth Action', {
-      action: 'initialize_oauth',
-      state,
-      timestamp: new Date().toISOString()
-    });
-
     set(googleOAuthStateAtom, {
       ...get(googleOAuthStateAtom),
       isInitializing: false,
@@ -397,14 +333,6 @@ export const initializeOAuthAtom = atom(
 export const handleOAuthCallbackAtom = atom(
   null,
   (get, set, { isCallback, callbackError }: { isCallback: boolean; callbackError?: string }) => {
-    console.info('OAuth Action', {
-      action: 'handle_oauth_callback',
-      isCallback,
-      hasError: !!callbackError,
-      error: callbackError,
-      timestamp: new Date().toISOString()
-    });
-
     set(googleOAuthStateAtom, {
       ...get(googleOAuthStateAtom),
       isCallback,

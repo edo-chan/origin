@@ -1,2 +1,1 @@
-export { GoogleLoginButton } from './GoogleLoginButton';
-export type { GoogleLoginButtonProps } from '../../../types/auth';
+export { GoogleLoginButton, type GoogleLoginButtonProps } from './GoogleLoginButton';

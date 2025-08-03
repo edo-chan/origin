@@ -1,6 +1,4 @@
 /**
- * Auth fetch - use plain fetch calls directly instead of helper functions
- * This file is kept for reference only
+ * Auth fetch utilities - deprecated
+ * Use action.ts functions instead for all auth operations
  */
-
-// Use plain fetch() calls directly in your components/hooks instead of these helpers

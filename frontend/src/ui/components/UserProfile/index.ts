@@ -1,2 +1,1 @@
-export { UserProfile } from './UserProfile';
-export type { UserProfileProps } from '../../../types/auth';
+export { UserProfile, type UserProfileProps } from './UserProfile';

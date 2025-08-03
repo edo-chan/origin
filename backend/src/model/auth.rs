@@ -194,8 +194,6 @@ impl JwtManager {
     /// Validate and decode a JWT token
     #[instrument(skip(self, token))]
     pub fn validate_token(&self, token: &str) -> Result<TokenClaims> {
-        debug!("Validating JWT token");
-
         let mut validation = Validation::new(Algorithm::HS256);
         validation.set_issuer(&[self.config.issuer.clone()]);
         validation.set_audience(&[self.config.audience.clone()]);
@@ -294,14 +292,14 @@ impl SessionManager {
             .context("Failed to serialize session data")?;
 
         // Store session with TTL
-        redis::AsyncCommands::set_ex(&mut *conn, &session_key, session_data, self.session_ttl_seconds).await
+        conn.set_ex::<_, _, ()>(&session_key, session_data, self.session_ttl_seconds).await
             .context("Failed to store session in Redis")?;
 
         // Also create a user -> session mapping for easy cleanup
         let user_sessions_key = format!("user_sessions:{}", session.user_id);
-        redis::AsyncCommands::sadd(&mut *conn, &user_sessions_key, &session.refresh_token_jti).await
+        conn.sadd::<_, _, ()>(&user_sessions_key, &session.refresh_token_jti).await
             .context("Failed to add session to user sessions set")?;
-        redis::AsyncCommands::expire(&mut *conn, &user_sessions_key, self.session_ttl_seconds as i64).await
+        conn.expire::<_, ()>(&user_sessions_key, self.session_ttl_seconds as i64).await
             .context("Failed to set TTL on user sessions set")?;
 
         info!(
@@ -322,7 +320,7 @@ impl SessionManager {
             .context("Failed to get Redis connection from pool")?;
 
         let session_key = format!("session:{}", refresh_token_jti);
-        let session_data: Option<String> = redis::AsyncCommands::get(&mut *conn, &session_key).await
+        let session_data: Option<String> = conn.get(&session_key).await
             .context("Failed to retrieve session from Redis")?;
 
         match session_data {
@@ -368,13 +366,13 @@ impl SessionManager {
         if let Some(session) = self.get_session(refresh_token_jti).await? {
             // Remove from user sessions set
             let user_sessions_key = format!("user_sessions:{}", session.user_id);
-            redis::AsyncCommands::srem(&mut *conn, &user_sessions_key, refresh_token_jti).await
+            conn.srem::<_, _, ()>(&user_sessions_key, refresh_token_jti).await
                 .context("Failed to remove session from user sessions set")?;
         }
 
         // Remove session
         let session_key = format!("session:{}", refresh_token_jti);
-        let removed: u32 = redis::AsyncCommands::del(&mut *conn, &session_key).await
+        let removed: u32 = conn.del(&session_key).await
             .context("Failed to delete session from Redis")?;
 
         if removed > 0 {
@@ -395,7 +393,7 @@ impl SessionManager {
             .context("Failed to get Redis connection from pool")?;
 
         let user_sessions_key = format!("user_sessions:{}", user_id);
-        let session_jtis: Vec<String> = redis::AsyncCommands::smembers(&mut *conn, &user_sessions_key).await
+        let session_jtis: Vec<String> = conn.smembers(&user_sessions_key).await
             .context("Failed to get user sessions from Redis")?;
 
         let mut invalidated_count = 0;
@@ -414,7 +412,7 @@ impl SessionManager {
         }
 
         // Clean up user sessions set
-        redis::AsyncCommands::del(&mut *conn, &user_sessions_key).await
+        conn.del::<_, ()>(&user_sessions_key).await
             .context("Failed to delete user sessions set")?;
 
         info!(
@@ -435,7 +433,7 @@ impl SessionManager {
             .context("Failed to get Redis connection from pool")?;
 
         let user_sessions_key = format!("user_sessions:{}", user_id);
-        let count: u32 = redis::AsyncCommands::scard(&mut *conn, &user_sessions_key).await
+        let count: u32 = conn.scard(&user_sessions_key).await
             .context("Failed to get user session count from Redis")?;
 
         debug!(user_id = %user_id, session_count = count, "Retrieved user session count");

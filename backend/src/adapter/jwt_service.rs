@@ -3,8 +3,8 @@ use chrono::{DateTime, Duration, Utc};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::collections::HashSet;
-use tracing::{debug, error, info, instrument, warn};
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
+use tracing::{debug, info, instrument, warn};
 use uuid::Uuid;
 
 /// JWT configuration for token management
@@ -100,7 +100,7 @@ pub struct TokenPair {
 }
 
 /// JWT service for token generation and validation
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct JwtService {
     config: JwtConfig,
     encoding_key: EncodingKey,
@@ -195,8 +195,8 @@ impl JwtService {
         let token_pair = TokenPair {
             access_token,
             refresh_token,
-            access_token_expires_at,
-            refresh_token_expires_at,
+            access_token_expires_at: access_expires_at,
+            refresh_token_expires_at: refresh_expires_at,
             token_type: "Bearer".to_string(),
         };
 
@@ -262,7 +262,7 @@ impl JwtService {
     }
 
     /// Generate a new access token from a refresh token
-    #[instrument(skip(self, refresh_token), fields(refresh_jti = %refresh_claims.jti))]
+    #[instrument(skip(self), fields(refresh_jti = %refresh_claims.jti))]
     pub fn refresh_access_token(
         &self,
         refresh_claims: &RefreshTokenClaims,
@@ -325,7 +325,7 @@ impl JwtService {
         }
 
         let payload = parts[1];
-        if let Ok(decoded) = base64::decode_config(payload, base64::URL_SAFE_NO_PAD) {
+        if let Ok(decoded) = URL_SAFE_NO_PAD.decode(payload) {
             if let Ok(claims) = serde_json::from_slice::<serde_json::Value>(&decoded) {
                 return claims.get("sub").and_then(|v| v.as_str()).map(|s| s.to_string());
             }
@@ -342,7 +342,7 @@ impl JwtService {
         }
 
         let payload = parts[1];
-        if let Ok(decoded) = base64::decode_config(payload, base64::URL_SAFE_NO_PAD) {
+        if let Ok(decoded) = URL_SAFE_NO_PAD.decode(payload) {
             if let Ok(claims) = serde_json::from_slice::<serde_json::Value>(&decoded) {
                 if let Some(exp) = claims.get("exp").and_then(|v| v.as_i64()) {
                     return Utc::now().timestamp() > exp;
@@ -361,7 +361,7 @@ impl JwtService {
         }
 
         let payload = parts[1];
-        if let Ok(decoded) = base64::decode_config(payload, base64::URL_SAFE_NO_PAD) {
+        if let Ok(decoded) = URL_SAFE_NO_PAD.decode(payload) {
             if let Ok(claims) = serde_json::from_slice::<serde_json::Value>(&decoded) {
                 if let Some(exp) = claims.get("exp").and_then(|v| v.as_i64()) {
                     return DateTime::from_timestamp(exp, 0);
@@ -377,7 +377,7 @@ impl JwtService {
         let parts: Vec<&str> = token.split('.').collect();
         parts.len() == 3 && 
         parts.iter().all(|part| !part.is_empty()) &&
-        parts.iter().all(|part| base64::decode_config(part, base64::URL_SAFE_NO_PAD).is_ok())
+        parts.iter().all(|part| URL_SAFE_NO_PAD.decode(part).is_ok())
     }
 }
 

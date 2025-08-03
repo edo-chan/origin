@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { AuthErrorMessage } from '@/ui/components/AuthErrorMessage/AuthErrorMessage';
-import { AuthError } from '@/types/auth';
+import { AuthError, AuthErrorCode } from '@/domain/auth/atoms';
 
 const meta: Meta<typeof AuthErrorMessage> = {
   title: 'Authentication/AuthErrorMessage',
@@ -315,26 +315,30 @@ export const ErrorTypesShowcase: Story = {
   render: () => {
     const networkError: AuthError = {
       message: 'Connection failed',
-      details: { message: 'Unable to reach authentication server' },
-      code: 'NETWORK_ERROR',
+      details: 'Unable to reach authentication server',
+      code: AuthErrorCode.NETWORK_ERROR,
+      timestamp: Date.now(),
     };
 
     const authError: AuthError = {
       message: 'Authentication failed',
-      details: { message: 'Invalid Google OAuth credentials' },
-      code: 'AUTH_FAILED',
+      details: 'Invalid Google OAuth credentials',
+      code: AuthErrorCode.OAUTH_SERVICE_ERROR,
+      timestamp: Date.now(),
     };
 
     const validationError: AuthError = {
       message: 'Invalid input',
-      details: { message: 'Email format is incorrect' },
-      code: 'VALIDATION_ERROR',
+      details: 'Email format is incorrect',
+      code: AuthErrorCode.INVALID_REQUEST,
+      timestamp: Date.now(),
     };
 
     const serverError: AuthError = {
       message: 'Server error',
-      details: { message: 'Internal server error occurred' },
-      code: 'SERVER_ERROR',
+      details: 'Internal server error occurred',
+      code: AuthErrorCode.UNKNOWN,
+      timestamp: Date.now(),
     };
 
     return (

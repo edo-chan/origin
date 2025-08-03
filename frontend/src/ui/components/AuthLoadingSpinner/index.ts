@@ -1,2 +1,1 @@
-export { AuthLoadingSpinner } from './AuthLoadingSpinner';
-export type { AuthLoadingSpinnerProps } from '../../../types/auth';
+export { AuthLoadingSpinner, type AuthLoadingSpinnerProps } from './AuthLoadingSpinner';

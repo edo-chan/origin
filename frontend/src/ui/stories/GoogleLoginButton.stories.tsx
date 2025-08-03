@@ -1,7 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { GoogleLoginButton } from '@/ui/components/GoogleLoginButton';
-import { GoogleLoginResponse, AuthError } from '../../types/auth';
+import { AuthError } from '@/domain/auth/atoms';
+
+// Mock response type for Storybook
+interface GoogleLoginResponse {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    picture?: string;
+  };
+  accessToken: string;
+  expiresIn: number;
+}
 
 const meta: Meta<typeof GoogleLoginButton> = {
   title: 'Auth/GoogleLoginButton',

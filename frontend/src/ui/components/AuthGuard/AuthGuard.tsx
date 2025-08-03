@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { AuthGuardProps, AuthState } from '../../../types/auth';
+import { AuthState, AuthErrorCode } from '../../../domain/auth/atoms';
+
+// AuthGuard component props interface
+export interface AuthGuardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  redirectTo?: string;
+  showLoading?: boolean;
+}
 import { Loading } from '../Loading';
-import { GoogleLoginButton } from '../GoogleLoginButton';
 import {
   authGuardContainer,
   loadingContainer,
@@ -17,8 +24,13 @@ const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
+    session: null,
+    accessToken: null,
+    refreshToken: null,
     isLoading: true,
     error: null,
+    lastActivity: Date.now(),
+    tokenExpiresAt: null,
   });
 
   useEffect(() => {
@@ -36,33 +48,57 @@ const useAuth = () => {
             isAuthenticated: true,
             user: {
               id: 'mock-user-id',
+              googleId: 'google123',
               email: 'user@example.com',
               name: 'Test User',
-              picture: 'https://via.placeholder.com/96x96',
+              pictureUrl: 'https://via.placeholder.com/96x96',
+              isActive: true,
+              isVerified: true,
+              createdAt: BigInt(Date.now()),
+              updatedAt: BigInt(Date.now()),
+              preferences: '{}',
             },
+            session: null,
+            accessToken: 'mock-token',
+            refreshToken: null,
             isLoading: false,
             error: null,
+            lastActivity: Date.now(),
+            tokenExpiresAt: Date.now() + 3600000,
           });
         } else {
           setAuthState({
             isAuthenticated: false,
             user: null,
+            session: null,
+            accessToken: null,
+            refreshToken: null,
             isLoading: false,
             error: null,
+            lastActivity: Date.now(),
+            tokenExpiresAt: null,
           });
         }
       } catch (error) {
-        console.error('Auth Check Error', {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          component: 'AuthGuard',
-          timestamp: new Date().toISOString(),
-        });
         
         setAuthState({
           isAuthenticated: false,
           user: null,
+          session: null,
+          accessToken: null,
+          refreshToken: null,
           isLoading: false,
-          error: error instanceof Error ? error.message : 'Authentication failed',
+          error: error instanceof Error ? {
+            code: AuthErrorCode.UNKNOWN,
+            message: error.message,
+            timestamp: Date.now(),
+          } : {
+            code: AuthErrorCode.UNKNOWN,
+            message: 'Authentication failed',
+            timestamp: Date.now(),
+          },
+          lastActivity: Date.now(),
+          tokenExpiresAt: null,
         });
       }
     };
@@ -86,14 +122,6 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   // Handle redirect to login page
   useEffect(() => {
     if (!isLoading && !isAuthenticated && redirectTo) {
-      console.info('Auth Guard Redirect', {
-        action: 'redirect_to_login',
-        component: 'AuthGuard',
-        redirectTo,
-        currentPath: router.asPath,
-        timestamp: new Date().toISOString(),
-      });
-      
       router.push(redirectTo);
     }
   }, [isLoading, isAuthenticated, redirectTo, router]);
@@ -116,33 +144,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
       <div className={authGuardContainer}>
         <div className={fallbackContainer}>
           <h2 className={fallbackTitle}>Authentication Error</h2>
-          <p className={fallbackDescription}>{error}</p>
-          <GoogleLoginButton
-            text="Try Again"
-            size="lg"
-            onSuccess={(response) => {
-              console.info('Auth Guard Login Success', {
-                action: 'login_success_from_guard',
-                component: 'AuthGuard',
-                userId: response.user.id,
-                timestamp: new Date().toISOString(),
-              });
-              
-              // Store token and refresh auth state
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('auth_token', response.accessToken);
-                window.location.reload();
-              }
-            }}
-            onError={(error) => {
-              console.error('Auth Guard Login Error', {
-                error: error.message,
-                code: error.code,
-                component: 'AuthGuard',
-                timestamp: new Date().toISOString(),
-              });
-            }}
-          />
+          <p className={fallbackDescription}>{typeof error === 'string' ? error : error.message}</p>
+          <p>Please refresh the page or go to the login page.</p>
         </div>
       </div>
     );
@@ -165,47 +168,13 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
         <div className={fallbackContainer}>
           <h2 className={fallbackTitle}>Sign in Required</h2>
           <p className={fallbackDescription}>
-            You need to be signed in to access this content. Please sign in with your Google account to continue.
+            You need to be signed in to access this content. Please go to the login page to continue.
           </p>
-          <GoogleLoginButton
-            text="Sign in with Google"
-            size="lg"
-            onSuccess={(response) => {
-              console.info('Auth Guard Login Success', {
-                action: 'login_success_from_guard',
-                component: 'AuthGuard',
-                userId: response.user.id,
-                timestamp: new Date().toISOString(),
-              });
-              
-              // Store token and refresh auth state
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('auth_token', response.accessToken);
-                window.location.reload();
-              }
-            }}
-            onError={(error) => {
-              console.error('Auth Guard Login Error', {
-                error: error.message,
-                code: error.code,
-                component: 'AuthGuard',
-                timestamp: new Date().toISOString(),
-              });
-            }}
-          />
         </div>
       </div>
     );
   }
 
   // User is authenticated, render protected content
-  console.debug('Auth Guard Success', {
-    action: 'render_protected_content',
-    component: 'AuthGuard',
-    userId: user?.id,
-    userEmail: user?.email,
-    timestamp: new Date().toISOString(),
-  });
-
   return <>{children}</>;
 };

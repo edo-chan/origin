@@ -291,6 +291,86 @@ pub struct UserSession {
     #[prost(bool, tag = "8")]
     pub is_current: bool,
 }
+/// Request to send OTP to email
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SendOtpRequest {
+    /// Email address to send OTP to
+    #[prost(string, tag = "1")]
+    pub email: ::prost::alloc::string::String,
+}
+/// Response for sending OTP
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SendOtpResponse {
+    /// Whether OTP was sent successfully
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    /// Success/error message
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+    /// OTP expiration timestamp
+    #[prost(int64, tag = "3")]
+    pub expires_at: i64,
+    /// Number of verification attempts allowed
+    #[prost(int32, tag = "4")]
+    pub attempts_allowed: i32,
+}
+/// Request to verify OTP
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyOtpRequest {
+    /// Email address
+    #[prost(string, tag = "1")]
+    pub email: ::prost::alloc::string::String,
+    /// OTP code to verify
+    #[prost(string, tag = "2")]
+    pub code: ::prost::alloc::string::String,
+    /// JSON string with device information
+    #[prost(string, optional, tag = "3")]
+    pub device_info: ::core::option::Option<::prost::alloc::string::String>,
+    /// Client IP address
+    #[prost(string, optional, tag = "4")]
+    pub ip_address: ::core::option::Option<::prost::alloc::string::String>,
+    /// User agent string
+    #[prost(string, optional, tag = "5")]
+    pub user_agent: ::core::option::Option<::prost::alloc::string::String>,
+}
+/// Response for OTP verification
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyOtpResponse {
+    /// Whether verification was successful
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    /// Success/error message
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+    /// JWT access token (if successful)
+    #[prost(string, optional, tag = "3")]
+    pub access_token: ::core::option::Option<::prost::alloc::string::String>,
+    /// JWT refresh token (if successful)
+    #[prost(string, optional, tag = "4")]
+    pub refresh_token: ::core::option::Option<::prost::alloc::string::String>,
+    /// Access token expiration
+    #[prost(int64, optional, tag = "5")]
+    pub access_token_expires_at: ::core::option::Option<i64>,
+    /// Refresh token expiration
+    #[prost(int64, optional, tag = "6")]
+    pub refresh_token_expires_at: ::core::option::Option<i64>,
+    /// "Bearer" (if successful)
+    #[prost(string, optional, tag = "7")]
+    pub token_type: ::core::option::Option<::prost::alloc::string::String>,
+    /// User profile information (if successful)
+    #[prost(message, optional, tag = "8")]
+    pub user: ::core::option::Option<UserProfile>,
+    /// Whether this is a newly created user
+    #[prost(bool, tag = "9")]
+    pub is_new_user: bool,
+    /// Remaining verification attempts
+    #[prost(int32, tag = "10")]
+    pub attempts_remaining: i32,
+}
 /// Generated client implementations.
 pub mod auth_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -594,6 +674,55 @@ pub mod auth_service_client {
                 .insert(GrpcMethod::new("auth.AuthService", "RevokeSession"));
             self.inner.unary(req, path, codec).await
         }
+        /// Send OTP to email
+        pub async fn send_otp(
+            &mut self,
+            request: impl tonic::IntoRequest<super::SendOtpRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::SendOtpResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static("/auth.AuthService/SendOtp");
+            let mut req = request.into_request();
+            req.extensions_mut().insert(GrpcMethod::new("auth.AuthService", "SendOtp"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// Verify OTP and login
+        pub async fn verify_otp(
+            &mut self,
+            request: impl tonic::IntoRequest<super::VerifyOtpRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::VerifyOtpResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/auth.AuthService/VerifyOtp",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("auth.AuthService", "VerifyOtp"));
+            self.inner.unary(req, path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -670,6 +799,19 @@ pub mod auth_service_server {
             request: tonic::Request<super::RevokeSessionRequest>,
         ) -> std::result::Result<
             tonic::Response<super::RevokeSessionResponse>,
+            tonic::Status,
+        >;
+        /// Send OTP to email
+        async fn send_otp(
+            &self,
+            request: tonic::Request<super::SendOtpRequest>,
+        ) -> std::result::Result<tonic::Response<super::SendOtpResponse>, tonic::Status>;
+        /// Verify OTP and login
+        async fn verify_otp(
+            &self,
+            request: tonic::Request<super::VerifyOtpRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::VerifyOtpResponse>,
             tonic::Status,
         >;
     }
@@ -1154,6 +1296,98 @@ pub mod auth_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = RevokeSessionSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/auth.AuthService/SendOtp" => {
+                    #[allow(non_camel_case_types)]
+                    struct SendOtpSvc<T: AuthService>(pub Arc<T>);
+                    impl<
+                        T: AuthService,
+                    > tonic::server::UnaryService<super::SendOtpRequest>
+                    for SendOtpSvc<T> {
+                        type Response = super::SendOtpResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::SendOtpRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as AuthService>::send_otp(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = SendOtpSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/auth.AuthService/VerifyOtp" => {
+                    #[allow(non_camel_case_types)]
+                    struct VerifyOtpSvc<T: AuthService>(pub Arc<T>);
+                    impl<
+                        T: AuthService,
+                    > tonic::server::UnaryService<super::VerifyOtpRequest>
+                    for VerifyOtpSvc<T> {
+                        type Response = super::VerifyOtpResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::VerifyOtpRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as AuthService>::verify_otp(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = VerifyOtpSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

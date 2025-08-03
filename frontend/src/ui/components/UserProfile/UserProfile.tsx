@@ -1,6 +1,18 @@
 import React from 'react';
 import Image from 'next/image';
-import { UserProfileProps } from '../../../types/auth';
+
+// UserProfile component props interface
+export interface UserProfileProps extends React.HTMLAttributes<HTMLDivElement> {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    picture?: string;
+  };
+  showAvatar?: boolean;
+  showEmail?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+}
 import {
   userProfileContainer,
   sizeVariants,
@@ -59,15 +71,6 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     userEmailSizeVariants[size],
   ].join(' ');
 
-  console.debug('User Profile Render', {
-    component: 'UserProfile',
-    userId: user.id,
-    userName: user.name,
-    showAvatar,
-    showEmail,
-    size,
-    timestamp: new Date().toISOString(),
-  });
 
   return (
     <div className={classes} style={style} {...props}>
@@ -82,14 +85,6 @@ export const UserProfile: React.FC<UserProfileProps> = ({
               width={64}
               height={64}
               onError={(e) => {
-                console.warn('Avatar Image Load Error', {
-                  error: 'Failed to load avatar image',
-                  component: 'UserProfile',
-                  userId: user.id,
-                  imageUrl: user.picture,
-                  timestamp: new Date().toISOString(),
-                });
-                
                 // Hide the broken image and show fallback
                 e.currentTarget.style.display = 'none';
                 const fallback = e.currentTarget.nextElementSibling as HTMLElement;

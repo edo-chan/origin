@@ -1,5 +1,5 @@
 import React from 'react';
-import * as Popover from '@radix-ui/react-popover';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { 
   dropdownContent, 
   dropdownItem, 
@@ -75,12 +75,12 @@ export const CustomDropdown: React.FC<DropdownProps> = ({
   };
 
   return (
-    <Popover.Root
+    <DropdownMenu.Root
       open={open}
       defaultOpen={defaultOpen}
       onOpenChange={onOpenChange}
     >
-      <Popover.Trigger asChild>
+      <DropdownMenu.Trigger asChild>
         <button 
           className={triggerClasses}
           style={style}
@@ -89,10 +89,10 @@ export const CustomDropdown: React.FC<DropdownProps> = ({
         >
           {trigger}
         </button>
-      </Popover.Trigger>
+      </DropdownMenu.Trigger>
       
-      <Popover.Portal>
-        <Popover.Content
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
           className={contentClasses}
           side={side}
           align={align}
@@ -102,23 +102,22 @@ export const CustomDropdown: React.FC<DropdownProps> = ({
         >
           {options.map((option, index) => (
             <React.Fragment key={option.value}>
-              <button
+              <DropdownMenu.Item
                 className={dropdownItem}
                 disabled={option.disabled}
-                onClick={() => handleOptionClick(option.value)}
+                onSelect={() => handleOptionClick(option.value)}
                 data-variant={variant}
                 data-size={size}
-                type="button"
               >
                 {option.label}
-              </button>
-              {option.separator && <div className={dropdownSeparator} />}
+              </DropdownMenu.Item>
+              {option.separator && <DropdownMenu.Separator className={dropdownSeparator} />}
             </React.Fragment>
           ))}
-          <Popover.Arrow className={dropdownArrow} />
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
+          <DropdownMenu.Arrow className={dropdownArrow} />
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 };
 

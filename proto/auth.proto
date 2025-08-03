@@ -75,6 +75,22 @@ service AuthService {
       body: "*"
     };
   }
+
+  // Send OTP to email
+  rpc SendOtp (SendOtpRequest) returns (SendOtpResponse) {
+    option (google.api.http) = {
+      post: "/api/auth/otp/send"
+      body: "*"
+    };
+  }
+
+  // Verify OTP and login
+  rpc VerifyOtp (VerifyOtpRequest) returns (VerifyOtpResponse) {
+    option (google.api.http) = {
+      post: "/api/auth/otp/verify"
+      body: "*"
+    };
+  }
 }
 
 // Request to initiate OAuth flow
@@ -219,4 +235,40 @@ message UserSession {
   int64 last_activity_at = 6;        // Last activity timestamp (Unix timestamp)
   int64 expires_at = 7;              // Session expiration timestamp (Unix timestamp)
   bool is_current = 8;               // Whether this is the current session
+}
+
+// Request to send OTP to email
+message SendOtpRequest {
+  string email = 1;                  // Email address to send OTP to
+}
+
+// Response for sending OTP
+message SendOtpResponse {
+  bool success = 1;                  // Whether OTP was sent successfully
+  string message = 2;                // Success/error message
+  int64 expires_at = 3;              // OTP expiration timestamp
+  int32 attempts_allowed = 4;        // Number of verification attempts allowed
+}
+
+// Request to verify OTP
+message VerifyOtpRequest {
+  string email = 1;                  // Email address
+  string code = 2;                   // OTP code to verify
+  optional string device_info = 3;   // JSON string with device information
+  optional string ip_address = 4;    // Client IP address
+  optional string user_agent = 5;    // User agent string
+}
+
+// Response for OTP verification
+message VerifyOtpResponse {
+  bool success = 1;                  // Whether verification was successful
+  string message = 2;                // Success/error message
+  optional string access_token = 3;  // JWT access token (if successful)
+  optional string refresh_token = 4; // JWT refresh token (if successful)
+  optional int64 access_token_expires_at = 5; // Access token expiration
+  optional int64 refresh_token_expires_at = 6; // Refresh token expiration
+  optional string token_type = 7;    // "Bearer" (if successful)
+  optional UserProfile user = 8;     // User profile information (if successful)
+  bool is_new_user = 9;              // Whether this is a newly created user
+  int32 attempts_remaining = 10;     // Remaining verification attempts
 }

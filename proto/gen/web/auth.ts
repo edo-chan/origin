@@ -241,6 +241,78 @@ export interface UserSession {
   isCurrent: boolean;
 }
 
+/** Request to send OTP to email */
+export interface SendOtpRequest {
+  /** Email address to send OTP to */
+  email: string;
+}
+
+/** Response for sending OTP */
+export interface SendOtpResponse {
+  /** Whether OTP was sent successfully */
+  success: boolean;
+  /** Success/error message */
+  message: string;
+  /** OTP expiration timestamp */
+  expiresAt: bigint;
+  /** Number of verification attempts allowed */
+  attemptsAllowed: number;
+}
+
+/** Request to verify OTP */
+export interface VerifyOtpRequest {
+  /** Email address */
+  email: string;
+  /** OTP code to verify */
+  code: string;
+  /** JSON string with device information */
+  deviceInfo?:
+    | string
+    | undefined;
+  /** Client IP address */
+  ipAddress?:
+    | string
+    | undefined;
+  /** User agent string */
+  userAgent?: string | undefined;
+}
+
+/** Response for OTP verification */
+export interface VerifyOtpResponse {
+  /** Whether verification was successful */
+  success: boolean;
+  /** Success/error message */
+  message: string;
+  /** JWT access token (if successful) */
+  accessToken?:
+    | string
+    | undefined;
+  /** JWT refresh token (if successful) */
+  refreshToken?:
+    | string
+    | undefined;
+  /** Access token expiration */
+  accessTokenExpiresAt?:
+    | bigint
+    | undefined;
+  /** Refresh token expiration */
+  refreshTokenExpiresAt?:
+    | bigint
+    | undefined;
+  /** "Bearer" (if successful) */
+  tokenType?:
+    | string
+    | undefined;
+  /** User profile information (if successful) */
+  user?:
+    | UserProfile
+    | undefined;
+  /** Whether this is a newly created user */
+  isNewUser: boolean;
+  /** Remaining verification attempts */
+  attemptsRemaining: number;
+}
+
 function createBaseInitiateOAuthRequest(): InitiateOAuthRequest {
   return { redirectUri: undefined, deviceName: undefined };
 }
@@ -2200,6 +2272,522 @@ export const UserSession: MessageFns<UserSession> = {
     message.lastActivityAt = object.lastActivityAt ?? 0n;
     message.expiresAt = object.expiresAt ?? 0n;
     message.isCurrent = object.isCurrent ?? false;
+    return message;
+  },
+};
+
+function createBaseSendOtpRequest(): SendOtpRequest {
+  return { email: "" };
+}
+
+export const SendOtpRequest: MessageFns<SendOtpRequest> = {
+  encode(message: SendOtpRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.email !== "") {
+      writer.uint32(10).string(message.email);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SendOtpRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSendOtpRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SendOtpRequest {
+    return { email: isSet(object.email) ? globalThis.String(object.email) : "" };
+  },
+
+  toJSON(message: SendOtpRequest): unknown {
+    const obj: any = {};
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<SendOtpRequest>, I>>(base?: I): SendOtpRequest {
+    return SendOtpRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<SendOtpRequest>, I>>(object: I): SendOtpRequest {
+    const message = createBaseSendOtpRequest();
+    message.email = object.email ?? "";
+    return message;
+  },
+};
+
+function createBaseSendOtpResponse(): SendOtpResponse {
+  return { success: false, message: "", expiresAt: 0n, attemptsAllowed: 0 };
+}
+
+export const SendOtpResponse: MessageFns<SendOtpResponse> = {
+  encode(message: SendOtpResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    if (message.expiresAt !== 0n) {
+      if (BigInt.asIntN(64, message.expiresAt) !== message.expiresAt) {
+        throw new globalThis.Error("value provided for field message.expiresAt of type int64 too large");
+      }
+      writer.uint32(24).int64(message.expiresAt);
+    }
+    if (message.attemptsAllowed !== 0) {
+      writer.uint32(32).int32(message.attemptsAllowed);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SendOtpResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSendOtpResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.expiresAt = reader.int64() as bigint;
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.attemptsAllowed = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SendOtpResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+      expiresAt: isSet(object.expiresAt) ? BigInt(object.expiresAt) : 0n,
+      attemptsAllowed: isSet(object.attemptsAllowed) ? globalThis.Number(object.attemptsAllowed) : 0,
+    };
+  },
+
+  toJSON(message: SendOtpResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    if (message.expiresAt !== 0n) {
+      obj.expiresAt = message.expiresAt.toString();
+    }
+    if (message.attemptsAllowed !== 0) {
+      obj.attemptsAllowed = Math.round(message.attemptsAllowed);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<SendOtpResponse>, I>>(base?: I): SendOtpResponse {
+    return SendOtpResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<SendOtpResponse>, I>>(object: I): SendOtpResponse {
+    const message = createBaseSendOtpResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    message.expiresAt = object.expiresAt ?? 0n;
+    message.attemptsAllowed = object.attemptsAllowed ?? 0;
+    return message;
+  },
+};
+
+function createBaseVerifyOtpRequest(): VerifyOtpRequest {
+  return { email: "", code: "", deviceInfo: undefined, ipAddress: undefined, userAgent: undefined };
+}
+
+export const VerifyOtpRequest: MessageFns<VerifyOtpRequest> = {
+  encode(message: VerifyOtpRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.email !== "") {
+      writer.uint32(10).string(message.email);
+    }
+    if (message.code !== "") {
+      writer.uint32(18).string(message.code);
+    }
+    if (message.deviceInfo !== undefined) {
+      writer.uint32(26).string(message.deviceInfo);
+    }
+    if (message.ipAddress !== undefined) {
+      writer.uint32(34).string(message.ipAddress);
+    }
+    if (message.userAgent !== undefined) {
+      writer.uint32(42).string(message.userAgent);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): VerifyOtpRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseVerifyOtpRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.code = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.deviceInfo = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.ipAddress = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.userAgent = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): VerifyOtpRequest {
+    return {
+      email: isSet(object.email) ? globalThis.String(object.email) : "",
+      code: isSet(object.code) ? globalThis.String(object.code) : "",
+      deviceInfo: isSet(object.deviceInfo) ? globalThis.String(object.deviceInfo) : undefined,
+      ipAddress: isSet(object.ipAddress) ? globalThis.String(object.ipAddress) : undefined,
+      userAgent: isSet(object.userAgent) ? globalThis.String(object.userAgent) : undefined,
+    };
+  },
+
+  toJSON(message: VerifyOtpRequest): unknown {
+    const obj: any = {};
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    if (message.code !== "") {
+      obj.code = message.code;
+    }
+    if (message.deviceInfo !== undefined) {
+      obj.deviceInfo = message.deviceInfo;
+    }
+    if (message.ipAddress !== undefined) {
+      obj.ipAddress = message.ipAddress;
+    }
+    if (message.userAgent !== undefined) {
+      obj.userAgent = message.userAgent;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<VerifyOtpRequest>, I>>(base?: I): VerifyOtpRequest {
+    return VerifyOtpRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<VerifyOtpRequest>, I>>(object: I): VerifyOtpRequest {
+    const message = createBaseVerifyOtpRequest();
+    message.email = object.email ?? "";
+    message.code = object.code ?? "";
+    message.deviceInfo = object.deviceInfo ?? undefined;
+    message.ipAddress = object.ipAddress ?? undefined;
+    message.userAgent = object.userAgent ?? undefined;
+    return message;
+  },
+};
+
+function createBaseVerifyOtpResponse(): VerifyOtpResponse {
+  return {
+    success: false,
+    message: "",
+    accessToken: undefined,
+    refreshToken: undefined,
+    accessTokenExpiresAt: undefined,
+    refreshTokenExpiresAt: undefined,
+    tokenType: undefined,
+    user: undefined,
+    isNewUser: false,
+    attemptsRemaining: 0,
+  };
+}
+
+export const VerifyOtpResponse: MessageFns<VerifyOtpResponse> = {
+  encode(message: VerifyOtpResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    if (message.accessToken !== undefined) {
+      writer.uint32(26).string(message.accessToken);
+    }
+    if (message.refreshToken !== undefined) {
+      writer.uint32(34).string(message.refreshToken);
+    }
+    if (message.accessTokenExpiresAt !== undefined) {
+      if (BigInt.asIntN(64, message.accessTokenExpiresAt) !== message.accessTokenExpiresAt) {
+        throw new globalThis.Error("value provided for field message.accessTokenExpiresAt of type int64 too large");
+      }
+      writer.uint32(40).int64(message.accessTokenExpiresAt);
+    }
+    if (message.refreshTokenExpiresAt !== undefined) {
+      if (BigInt.asIntN(64, message.refreshTokenExpiresAt) !== message.refreshTokenExpiresAt) {
+        throw new globalThis.Error("value provided for field message.refreshTokenExpiresAt of type int64 too large");
+      }
+      writer.uint32(48).int64(message.refreshTokenExpiresAt);
+    }
+    if (message.tokenType !== undefined) {
+      writer.uint32(58).string(message.tokenType);
+    }
+    if (message.user !== undefined) {
+      UserProfile.encode(message.user, writer.uint32(66).fork()).join();
+    }
+    if (message.isNewUser !== false) {
+      writer.uint32(72).bool(message.isNewUser);
+    }
+    if (message.attemptsRemaining !== 0) {
+      writer.uint32(80).int32(message.attemptsRemaining);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): VerifyOtpResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseVerifyOtpResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.accessToken = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.refreshToken = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.accessTokenExpiresAt = reader.int64() as bigint;
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.refreshTokenExpiresAt = reader.int64() as bigint;
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.tokenType = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.user = UserProfile.decode(reader, reader.uint32());
+          continue;
+        }
+        case 9: {
+          if (tag !== 72) {
+            break;
+          }
+
+          message.isNewUser = reader.bool();
+          continue;
+        }
+        case 10: {
+          if (tag !== 80) {
+            break;
+          }
+
+          message.attemptsRemaining = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): VerifyOtpResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+      accessToken: isSet(object.accessToken) ? globalThis.String(object.accessToken) : undefined,
+      refreshToken: isSet(object.refreshToken) ? globalThis.String(object.refreshToken) : undefined,
+      accessTokenExpiresAt: isSet(object.accessTokenExpiresAt) ? BigInt(object.accessTokenExpiresAt) : undefined,
+      refreshTokenExpiresAt: isSet(object.refreshTokenExpiresAt) ? BigInt(object.refreshTokenExpiresAt) : undefined,
+      tokenType: isSet(object.tokenType) ? globalThis.String(object.tokenType) : undefined,
+      user: isSet(object.user) ? UserProfile.fromJSON(object.user) : undefined,
+      isNewUser: isSet(object.isNewUser) ? globalThis.Boolean(object.isNewUser) : false,
+      attemptsRemaining: isSet(object.attemptsRemaining) ? globalThis.Number(object.attemptsRemaining) : 0,
+    };
+  },
+
+  toJSON(message: VerifyOtpResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    if (message.accessToken !== undefined) {
+      obj.accessToken = message.accessToken;
+    }
+    if (message.refreshToken !== undefined) {
+      obj.refreshToken = message.refreshToken;
+    }
+    if (message.accessTokenExpiresAt !== undefined) {
+      obj.accessTokenExpiresAt = message.accessTokenExpiresAt.toString();
+    }
+    if (message.refreshTokenExpiresAt !== undefined) {
+      obj.refreshTokenExpiresAt = message.refreshTokenExpiresAt.toString();
+    }
+    if (message.tokenType !== undefined) {
+      obj.tokenType = message.tokenType;
+    }
+    if (message.user !== undefined) {
+      obj.user = UserProfile.toJSON(message.user);
+    }
+    if (message.isNewUser !== false) {
+      obj.isNewUser = message.isNewUser;
+    }
+    if (message.attemptsRemaining !== 0) {
+      obj.attemptsRemaining = Math.round(message.attemptsRemaining);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<VerifyOtpResponse>, I>>(base?: I): VerifyOtpResponse {
+    return VerifyOtpResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<VerifyOtpResponse>, I>>(object: I): VerifyOtpResponse {
+    const message = createBaseVerifyOtpResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    message.accessToken = object.accessToken ?? undefined;
+    message.refreshToken = object.refreshToken ?? undefined;
+    message.accessTokenExpiresAt = object.accessTokenExpiresAt ?? undefined;
+    message.refreshTokenExpiresAt = object.refreshTokenExpiresAt ?? undefined;
+    message.tokenType = object.tokenType ?? undefined;
+    message.user = (object.user !== undefined && object.user !== null)
+      ? UserProfile.fromPartial(object.user)
+      : undefined;
+    message.isNewUser = object.isNewUser ?? false;
+    message.attemptsRemaining = object.attemptsRemaining ?? 0;
     return message;
   },
 };

@@ -36,9 +36,9 @@ RUN mkdir -p ../proto && \
     echo 'syntax = "proto3"; package greeter;' > ../proto/greeter.proto && \
     echo 'syntax = "proto3"; package auth;' > ../proto/auth.proto
 
-# Create minimal googleapis structure
-RUN mkdir -p ../googleapis/google/api && \
-    touch ../googleapis/google/api/annotations.proto ../googleapis/google/api/http.proto
+# Create minimal googleapis structure inside proto
+RUN mkdir -p ../proto/googleapis/google/api && \
+    touch ../proto/googleapis/google/api/annotations.proto ../proto/googleapis/google/api/http.proto
 
 # Create minimal frontend package.json for build.rs
 RUN mkdir -p ../frontend && echo '{"name":"frontend"}' > ../frontend/package.json
@@ -54,10 +54,10 @@ WORKDIR /app
 COPY --from=planner /app/recipe.json ./
 
 # Create same minimal structure as planner
-RUN mkdir -p ../proto ../googleapis/google/api ../frontend && \
+RUN mkdir -p ../proto/googleapis/google/api ../frontend && \
     echo 'syntax = "proto3"; package greeter;' > ../proto/greeter.proto && \
     echo 'syntax = "proto3"; package auth;' > ../proto/auth.proto && \
-    touch ../googleapis/google/api/annotations.proto ../googleapis/google/api/http.proto && \
+    touch ../proto/googleapis/google/api/annotations.proto ../proto/googleapis/google/api/http.proto && \
     echo '{"name":"frontend"}' > ../frontend/package.json
 
 # Build dependencies with cache mounts
@@ -76,7 +76,6 @@ COPY backend/Cargo.toml backend/Cargo.lock backend/build.rs ./
 
 # Copy complete proto files and dependencies for build
 COPY proto ../proto
-COPY googleapis ../googleapis
 COPY frontend/package.json ../frontend/
 
 # Build application with cache mounts and copy binary out

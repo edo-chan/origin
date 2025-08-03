@@ -1,5 +1,14 @@
 import React from 'react';
-import { LogoutButtonProps } from '../../../types/auth';
+
+// LogoutButton component props interface
+export interface LogoutButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
+  text?: string;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'secondary' | 'tertiary';
+  isLoading?: boolean;
+  disabled?: boolean;
+  onLogout?: () => void | Promise<void>;
+}
 import { sizeVariants } from '../Button/Button.css';
 import {
   logoutButtonBase,
@@ -47,11 +56,6 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
       return;
     }
 
-    console.info('Logout Initiated', {
-      action: 'logout_initiated',
-      component: 'LogoutButton',
-      timestamp: new Date().toISOString(),
-    });
 
     try {
       // Call the logout callback
@@ -62,12 +66,6 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
         localStorage.removeItem('auth_token');
         localStorage.removeItem('refresh_token');
         
-        console.info('Logout Success', {
-          action: 'logout_success',
-          component: 'LogoutButton',
-          method: 'local_storage_clear',
-          timestamp: new Date().toISOString(),
-        });
         
         // Redirect to home page or refresh
         if (typeof window !== 'undefined') {
@@ -75,11 +73,6 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
         }
       }
     } catch (error) {
-      console.error('Logout Error', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        component: 'LogoutButton',
-        timestamp: new Date().toISOString(),
-      });
     }
   };
 

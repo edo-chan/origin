@@ -1,7 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { UserProfile } from '@/ui/components/UserProfile';
-import { User } from '../../types/auth';
+
+// Mock user type for Storybook
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  picture?: string;
+  givenName?: string;
+  familyName?: string;
+}
 
 const meta: Meta<typeof UserProfile> = {
   title: 'Auth/UserProfile',

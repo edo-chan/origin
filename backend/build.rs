@@ -15,7 +15,7 @@ fn compile_proto(
         .out_dir("../proto/rust/gen")
         .compile(
             &proto.iter().map(|p| p.as_path()).collect::<Vec<_>>(), 
-            &[proto_dir, "../googleapis"]
+            &[proto_dir, "../proto/googleapis"]
         )?;
     Ok(())
 }
@@ -25,23 +25,21 @@ fn compile_envoy_descriptor_set(
     manifest_dir: PathBuf,
     proto_dir: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let static_out = manifest_dir.join("proto.pb");
-    fs::create_dir_all(static_out.parent().unwrap())?;
+    // Generate proto.pb directly into envoy directory
+    let envoy_proto_pb = manifest_dir.join("envoy/proto.pb");
+    fs::create_dir_all(envoy_proto_pb.parent().unwrap())?;
+    
     tonic_build::configure()
         .build_server(false)
         .build_client(false)
-        .file_descriptor_set_path(&static_out)
+        .file_descriptor_set_path(&envoy_proto_pb)
         .disable_package_emission()
         .compile(
             &all_proto_definitions.iter().map(|p| p.as_path()).collect::<Vec<_>>(), 
-            &[proto_dir, "../googleapis"]
+            &[proto_dir, "../proto/googleapis"]
         )?;
     
-    // Copy to envoy directory for Docker builds
-    let envoy_proto_pb = manifest_dir.join("envoy/proto.pb");
-    fs::create_dir_all(envoy_proto_pb.parent().unwrap())?;
-    fs::copy(&static_out, &envoy_proto_pb)?;
-    println!("cargo:warning=Copied proto.pb to envoy directory for Docker build");
+    println!("cargo:warning=Generated proto.pb directly in envoy directory");
     
     Ok(())
 }
@@ -72,7 +70,7 @@ fn compile_web(
     ];
     let import_path = format!("-I={proto_dir}");
     ts_args.push(import_path);
-    ts_args.push("-I=../googleapis".to_string());
+    ts_args.push("-I=../proto/googleapis".to_string());
     for proto in all_proto_definitions.iter() {
         ts_args.push(format!("{}", proto.display()));
     }

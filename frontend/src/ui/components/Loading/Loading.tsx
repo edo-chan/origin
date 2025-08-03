@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Progress from '@radix-ui/react-progress';
 import { loadingBase, spinnerVariants, progressBarVariants, dotsVariants, sizeVariants } from './Loading.css';
 
 export interface LoadingProps {
@@ -35,14 +36,19 @@ export const Loading: React.FC<LoadingProps> = ({
   }
 
   if (type === 'progress') {
+    const progressValue = Math.min(Math.max(progress, 0), 100);
     return (
       <div className={baseClasses} style={style}>
-        <div className={progressBarVariants.track}>
-          <div 
+        <Progress.Root 
+          className={progressBarVariants.track}
+          value={progressValue}
+          max={100}
+        >
+          <Progress.Indicator 
             className={progressBarVariants[variant]}
-            style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+            style={{ transform: `translateX(-${100 - progressValue}%)` }}
           />
-        </div>
+        </Progress.Root>
       </div>
     );
   }

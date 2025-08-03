@@ -58,11 +58,22 @@ reqwest = { version = "0.11.22", default-features = false, features = ["json", "
 uuid = { version = "1.4.1", default-features = false, features = ["v4", "serde"] }
 argon2 = { version = "0.5.2", default-features = false, features = ["std"] }
 rand = { version = "0.8.5", default-features = false, features = ["std", "std_rng"] }
+sha2 = { version = "0.10.8", default-features = false, features = ["std"] }
+base64 = { version = "0.21.7", default-features = false, features = ["std"] }
 
 # Logging with minimal features
 tracing = { version = "0.1", default-features = false, features = ["std"] }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "json", "fmt"] }
 anyhow = { version = "1.0", default-features = false, features = ["std"] }
+
+# AWS SDK for SES and Parameter Store
+aws-config = { version = "1.1.7", default-features = false, features = ["behavior-version-latest", "rt-tokio"] }
+aws-sdk-ses = { version = "1.18.0", default-features = false }
+aws-sdk-ssm = { version = "1.18.0", default-features = false }
+
+# Plaid integration
+plaid = { version = "9.0.1", default-features = false }
+url = { version = "2.5.0", default-features = false }
 
 [build-dependencies]
 tonic-build = { version = "0.11.0", default-features = false, features = ["prost"] }

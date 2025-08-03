@@ -1,2 +1,1 @@
-export { AuthErrorMessage } from './AuthErrorMessage';
-export type { AuthErrorMessageProps } from '../../../types/auth';
+export { AuthErrorMessage, type AuthErrorMessageProps } from './AuthErrorMessage';

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '../hooks';
-import { GoogleLoginButton } from './GoogleLoginButton';
+import { OtpLoginForm } from '@/domain/otp';
+import { Stack } from '@/ui/components/Stack';
+import { Text } from '@/ui/components/Text';
 import * as styles from './ProtectedRoute.css';
 
 interface ProtectedRouteProps {
@@ -116,7 +118,7 @@ export function ProtectedRoute({
   // Handle redirect for unauthenticated users
   useEffect(() => {
     if (!showLoginPrompt && !isAuthenticated && !isLoading && !isRefreshing) {
-      const loginUrl = redirectPath || '/auth/login';
+      const loginUrl = redirectPath || '/auth/otp';
       const returnUrl = router.asPath;
       
       console.info('Protected Route', {
@@ -137,34 +139,36 @@ export function ProtectedRoute({
     }
 
     return (
-      <div className={styles.container}>
-        <div className={styles.loadingContainer}>
+      <Stack className={styles.container}>
+        <Stack className={styles.loadingContainer} gap="md">
           <div className={styles.loadingSpinner} />
-          <h2 className={styles.loadingText}>
-            {isRefreshing ? 'Refreshing session...' : 'Loading...'}
-          </h2>
-          <p className={styles.loadingSubtext}>
+          <Text as="h2" variant="primary" size="lg" className={styles.loadingText}>
+            {isRefreshing ? "Refreshing session..." : "Loading..."}
+          </Text>
+          <Text variant="secondary" className={styles.loadingSubtext}>
             {isRefreshing 
-              ? 'Please wait while we refresh your authentication.'
-              : 'Please wait while we verify your authentication.'
+              ? "Please wait while we refresh your authentication."
+              : "Please wait while we verify your authentication."
             }
-          </p>
-        </div>
-      </div>
+          </Text>
+        </Stack>
+      </Stack>
     );
   }
 
   // Show error state
   if (error && !isAuthenticated) {
     return (
-      <div className={styles.container}>
-        <div className={styles.errorContainer}>
+      <Stack className={styles.container}>
+        <Stack className={styles.errorContainer} gap="md">
           <ErrorIcon />
-          <h2 className={styles.errorTitle}>Authentication Error</h2>
-          <p className={styles.errorMessage}>
-            {error.message || 'There was a problem with authentication. Please try again.'}
-          </p>
-          <div className={styles.errorActions}>
+          <Text as="h2" variant="primary" size="lg" className={styles.errorTitle}>
+            {"Authentication Error"}
+          </Text>
+          <Text variant="secondary" className={styles.errorMessage}>
+            {error.message || "There was a problem with authentication. Please try again."}
+          </Text>
+          <Stack className={styles.errorActions} gap="sm">
             <button 
               className={styles.retryButton}
               onClick={() => {
@@ -173,14 +177,14 @@ export function ProtectedRoute({
                 }
               }}
             >
-              Retry
+              {"Retry"}
             </button>
             <Link href="/" className={styles.alternativeLink}>
-              Go to Home
+              {"Go to Home"}
             </Link>
-          </div>
-        </div>
-      </div>
+          </Stack>
+        </Stack>
+      </Stack>
     );
   }
 
@@ -192,24 +196,22 @@ export function ProtectedRoute({
 
     if (showLoginPrompt) {
       return (
-        <div className={styles.container}>
-          <div className={styles.loginPromptContainer}>
-            <h1 className={styles.loginPromptTitle}>Sign in required</h1>
-            <p className={styles.loginPromptSubtitle}>
-              You need to sign in to access this page. We&apos;ll bring you right back here after you sign in.
-            </p>
-            <div className={styles.loginPromptActions}>
-              <GoogleLoginButton 
-                variant="full-width"
-                text="Sign in to continue"
-                redirectUri={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
-              />
+        <Stack className={styles.container}>
+          <Stack className={styles.loginPromptContainer} gap="lg">
+            <Text as="h2" variant="primary" size="xl" className={styles.loginPromptTitle}>
+              {"Sign in required"}
+            </Text>
+            <Text variant="secondary" className={styles.loginPromptSubtitle}>
+              {"You need to sign in to access this page. We'll bring you right back here after you sign in."}
+            </Text>
+            <Stack className={styles.loginPromptActions} gap="md">
+              <OtpLoginForm />
               <Link href="/" className={styles.alternativeLink}>
-                Go to Home instead
+                {"Go to Home instead"}
               </Link>
-            </div>
-          </div>
-        </div>
+            </Stack>
+          </Stack>
+        </Stack>
       );
     }
 

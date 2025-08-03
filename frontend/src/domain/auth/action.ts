@@ -24,45 +24,11 @@ import type {
   RevokeSessionResponse,
 } from '@/proto/auth';
 
+// Environment configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:49999';
+
 export async function initiateOAuth(request: InitiateOAuthRequest): Promise<InitiateOAuthResponse> {
-  console.log('🚀 Auth Action: Starting OAuth initiation', request);
-  
-  try {
-    const response = await fetch('http://localhost:49999/api/auth/oauth/google/initiate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
-
-    console.log('📡 Auth Action: Got response', { 
-      status: response.status, 
-      ok: response.ok,
-      statusText: response.statusText 
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Auth Action: Request failed', { 
-        status: response.status, 
-        statusText: response.statusText,
-        error: errorText 
-      });
-      throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
-    }
-
-    const result = await response.json();
-    console.log('✅ Auth Action: Success', result);
-    return result;
-  } catch (error) {
-    console.error('💥 Auth Action: Exception caught', error);
-    throw error;
-  }
-}
-
-export async function completeOAuth(request: CompleteOAuthRequest): Promise<CompleteOAuthResponse> {
-  const response = await fetch('http://localhost:49999/api/auth/oauth/google/complete', {
+  const response = await fetch(`${API_BASE_URL}/api/auth/oauth/google/initiate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -71,14 +37,32 @@ export async function completeOAuth(request: CompleteOAuthRequest): Promise<Comp
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  return response.json();
+}
+
+export async function completeOAuth(request: CompleteOAuthRequest): Promise<CompleteOAuthResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/oauth/google/complete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   return response.json();
 }
 
 export async function refreshToken(request: RefreshTokenRequest): Promise<RefreshTokenResponse> {
-  const response = await fetch('http://localhost:49999/api/auth/refresh', {
+  const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -87,14 +71,15 @@ export async function refreshToken(request: RefreshTokenRequest): Promise<Refres
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   return response.json();
 }
 
 export async function validateToken(request: ValidateTokenRequest): Promise<ValidateTokenResponse> {
-  const response = await fetch('http://localhost:49999/api/auth/validate', {
+  const response = await fetch(`${API_BASE_URL}/api/auth/validate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -103,14 +88,15 @@ export async function validateToken(request: ValidateTokenRequest): Promise<Vali
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   return response.json();
 }
 
 export async function getProfile(request: GetProfileRequest): Promise<GetProfileResponse> {
-  const response = await fetch('http://localhost:49999/api/auth/profile', {
+  const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -119,14 +105,15 @@ export async function getProfile(request: GetProfileRequest): Promise<GetProfile
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   return response.json();
 }
 
 export async function logout(request: LogoutRequest): Promise<LogoutResponse> {
-  const response = await fetch('http://localhost:49999/api/auth/logout', {
+  const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -135,14 +122,15 @@ export async function logout(request: LogoutRequest): Promise<LogoutResponse> {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   return response.json();
 }
 
 export async function logoutAll(request: LogoutAllRequest): Promise<LogoutAllResponse> {
-  const response = await fetch('http://localhost:49999/api/auth/logout-all', {
+  const response = await fetch(`${API_BASE_URL}/api/auth/logout-all`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -151,14 +139,15 @@ export async function logoutAll(request: LogoutAllRequest): Promise<LogoutAllRes
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   return response.json();
 }
 
 export async function getUserSessions(request: GetUserSessionsRequest): Promise<GetUserSessionsResponse> {
-  const response = await fetch('http://localhost:49999/api/auth/sessions', {
+  const response = await fetch(`${API_BASE_URL}/api/auth/sessions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -167,14 +156,15 @@ export async function getUserSessions(request: GetUserSessionsRequest): Promise<
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   return response.json();
 }
 
 export async function revokeSession(request: RevokeSessionRequest): Promise<RevokeSessionResponse> {
-  const response = await fetch('http://localhost:49999/api/auth/sessions/revoke', {
+  const response = await fetch(`${API_BASE_URL}/api/auth/sessions/revoke`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -183,7 +173,8 @@ export async function revokeSession(request: RevokeSessionRequest): Promise<Revo
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
   return response.json();

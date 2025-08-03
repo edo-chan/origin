@@ -1,5 +1,10 @@
 import React from 'react';
-import { AuthLoadingSpinnerProps } from '../../../types/auth';
+
+// AuthLoadingSpinner component props interface
+export interface AuthLoadingSpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
+  message?: string;
+  size?: 'sm' | 'md' | 'lg';
+}
 import {
   authLoadingContainer,
   authLoadingSizeVariants,

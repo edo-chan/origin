@@ -1,5 +1,14 @@
 import React from 'react';
-import { GoogleLoginButtonProps } from '../../../types/auth';
+
+// GoogleLoginButton component props interface
+export interface GoogleLoginButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
+  text?: string;
+  size?: 'sm' | 'md' | 'lg';
+  isLoading?: boolean;
+  disabled?: boolean;
+  onSuccess?: (response: any) => void;
+  onError?: (error: any) => void;
+}
 import {
   googleLoginButtonBase,
   googleButtonSizeVariants,
@@ -55,11 +64,6 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       return;
     }
 
-    console.info('Google Login', {
-      action: 'login_initiated',
-      component: 'GoogleLoginButton',
-      timestamp: new Date().toISOString(),
-    });
 
     try {
       // Mock implementation - replace with actual Google OAuth logic
@@ -82,13 +86,6 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      console.info('Google Login Success', {
-        action: 'login_success',
-        component: 'GoogleLoginButton',
-        userId: mockUser.id,
-        email: mockUser.email,
-        timestamp: new Date().toISOString(),
-      });
 
       onSuccess?.(mockResponse);
     } catch (error) {
@@ -98,12 +95,6 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         details: { originalError: error },
       };
 
-      console.error('Google Login Error', {
-        error: authError.message,
-        code: authError.code,
-        component: 'GoogleLoginButton',
-        timestamp: new Date().toISOString(),
-      });
 
       onError?.(authError);
     }

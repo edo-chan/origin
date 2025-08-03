@@ -64,12 +64,6 @@ export class TokenManager {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) {
-        console.warn('JWT Token', {
-          action: 'parse_token_failed',
-          reason: 'invalid_format',
-          partsCount: parts.length,
-          timestamp: new Date().toISOString()
-        });
         return null;
       }
 
@@ -78,21 +72,8 @@ export class TokenManager {
       const decoded = this.base64UrlDecode(payload);
       const parsed = JSON.parse(decoded);
 
-      console.debug('JWT Token', {
-        action: 'token_parsed',
-        userId: parsed.sub,
-        expiresAt: new Date(parsed.exp * 1000).toISOString(),
-        issuedAt: new Date(parsed.iat * 1000).toISOString(),
-        timestamp: new Date().toISOString()
-      });
-
       return parsed as JWTPayload;
     } catch (error) {
-      console.error('JWT Token', {
-        action: 'parse_token_error',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
       return null;
     }
   }
@@ -133,21 +114,6 @@ export class TokenManager {
 
     if (isExpired) {
       result.error = 'Token expired';
-      console.info('JWT Token', {
-        action: 'token_validation',
-        result: 'expired',
-        userId: payload.sub,
-        expiredAt: new Date(payload.exp * 1000).toISOString(),
-        timestamp: new Date().toISOString()
-      });
-    } else {
-      console.debug('JWT Token', {
-        action: 'token_validation',
-        result: 'valid',
-        userId: payload.sub,
-        expiresIn: Math.floor(expiresIn),
-        timestamp: new Date().toISOString()
-      });
     }
 
     return result;
@@ -164,17 +130,6 @@ export class TokenManager {
 
     const shouldRefresh = (validation.expiresIn || 0) <= this.refreshConfig.refreshThresholdSeconds;
     
-    if (shouldRefresh) {
-      console.info('JWT Token', {
-        action: 'should_refresh_token',
-        result: true,
-        expiresIn: validation.expiresIn,
-        threshold: this.refreshConfig.refreshThresholdSeconds,
-        userId: validation.payload.sub,
-        timestamp: new Date().toISOString()
-      });
-    }
-
     return shouldRefresh;
   }
 
@@ -187,22 +142,11 @@ export class TokenManager {
   ): Promise<string | null> {
     // Prevent multiple simultaneous refresh attempts
     if (this.refreshPromise) {
-      console.debug('JWT Token', {
-        action: 'refresh_token_deduplicated',
-        message: 'Using existing refresh promise',
-        timestamp: new Date().toISOString()
-      });
       return this.refreshPromise;
     }
 
     const requestId = generateUUID();
     
-    console.info('JWT Token', {
-      action: 'refresh_token_start',
-      requestId,
-      timestamp: new Date().toISOString()
-    });
-
     this.refreshPromise = this.performTokenRefresh(refreshToken, refreshFunction, requestId);
     
     try {
@@ -225,24 +169,7 @@ export class TokenManager {
 
     for (let attempt = 1; attempt <= this.refreshConfig.maxRetries; attempt++) {
       try {
-        console.debug('JWT Token', {
-          action: 'refresh_token_attempt',
-          requestId,
-          attempt,
-          maxRetries: this.refreshConfig.maxRetries,
-          timestamp: new Date().toISOString()
-        });
-
         const response = await refreshFunction(refreshToken);
-        
-        console.info('JWT Token', {
-          action: 'refresh_token_success',
-          requestId,
-          attempt,
-          newExpiresAt: new Date(response.expiresAt * 1000).toISOString(),
-          hasNewRefreshToken: !!response.refreshToken,
-          timestamp: new Date().toISOString()
-        });
 
         // Schedule next refresh if auto-refresh is enabled
         if (this.refreshConfig.autoRefresh) {
@@ -252,15 +179,6 @@ export class TokenManager {
         return response.accessToken;
       } catch (error) {
         lastError = error instanceof Error ? error : new Error('Unknown refresh error');
-        
-        console.warn('JWT Token', {
-          action: 'refresh_token_attempt_failed',
-          requestId,
-          attempt,
-          error: lastError.message,
-          willRetry: attempt < this.refreshConfig.maxRetries,
-          timestamp: new Date().toISOString()
-        });
 
         if (attempt < this.refreshConfig.maxRetries) {
           const delay = this.refreshConfig.retryDelayMs * attempt; // Exponential backoff
@@ -268,14 +186,6 @@ export class TokenManager {
         }
       }
     }
-
-    console.error('JWT Token', {
-      action: 'refresh_token_failed',
-      requestId,
-      error: lastError?.message || 'Unknown error',
-      attemptsExhausted: this.refreshConfig.maxRetries,
-      timestamp: new Date().toISOString()
-    });
 
     return null;
   }
@@ -302,20 +212,10 @@ export class TokenManager {
       (validation.expiresIn! - this.refreshConfig.refreshThresholdSeconds) * 1000
     );
 
-    console.debug('JWT Token', {
-      action: 'schedule_token_refresh',
-      delaySeconds: Math.floor(delayMs / 1000),
-      refreshAt: new Date(Date.now() + delayMs).toISOString(),
-      timestamp: new Date().toISOString()
-    });
 
     this.refreshTimer = setTimeout(() => {
-      this.refreshToken(refreshToken, refreshFunction).catch(error => {
-        console.error('JWT Token', {
-          action: 'scheduled_refresh_failed',
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString()
-        });
+      this.refreshToken(refreshToken, refreshFunction).catch(() => {
+        // Silently handle scheduled refresh failures
       });
     }, delayMs);
   }
@@ -327,11 +227,6 @@ export class TokenManager {
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer);
       this.refreshTimer = null;
-      
-      console.debug('JWT Token', {
-        action: 'scheduled_refresh_cleared',
-        timestamp: new Date().toISOString()
-      });
     }
   }
 
@@ -390,3 +285,20 @@ export const validateJWTToken = (token: string): TokenValidationResult => tokenM
 export const shouldRefreshJWTToken = (token: string): boolean => tokenManager.shouldRefreshToken(token);
 export const getUserFromJWTToken = (token: string): { id: string; email: string; name: string } | null => 
   tokenManager.getUserFromToken(token);
+
+// Token interface for setTokens function
+export interface TokenData {
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiresAt: number;
+  refreshTokenExpiresAt: number;
+}
+
+// Placeholder setTokens function for backward compatibility
+// This should be implemented using auth atoms in the actual application
+export const setTokens = (tokens: TokenData): void => {
+  // This is a placeholder - in a real implementation, this would use
+  // the auth atoms (updateTokensAtom) to set the tokens
+  console.warn('setTokens called - this should be replaced with proper auth state management');
+  console.log('Tokens to set:', tokens);
+};
