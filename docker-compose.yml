@@ -50,8 +50,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "49999:8080"
-    depends_on:
-      - backend
     networks:
       - app-network
 

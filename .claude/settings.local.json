@@ -96,7 +96,8 @@
       "Bash(AWS_PROFILE=personal pulumi config get environment)",
       "WebFetch(domain:github.com)",
       "Bash(AWS_PROFILE=personal pulumi config set environment local)",
-      "Bash(AWS_PROFILE=personal aws ssm get-parameters --names \"/origin/local/database-url\" \"/origin/local/redis-url\" \"/origin/local/jwt-secret\" \"/origin/local/claude-api-key\" --with-decryption)"
+      "Bash(AWS_PROFILE=personal aws ssm get-parameters --names \"/origin/local/database-url\" \"/origin/local/redis-url\" \"/origin/local/jwt-secret\" \"/origin/local/claude-api-key\" --with-decryption)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }

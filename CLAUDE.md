@@ -11,12 +11,12 @@ Full-stack template: Rust backend + Next.js frontend.
 **IGNORE ERROR IN CODE GEN**
 **DO NOT INSTALL PROTOBUF ON FRONTEND**: DO NOT install `@bufbuild/protobuf` for JS/TS
 
-**To modify APIs**: Edit `.proto` files → Run `cargo build`
+**To modify APIs**: Edit `.proto` files → Run `cargo check`
 
 ## Backend (Rust)
 
 **Stack**: Tonic gRPC, PostgreSQL/SQLx, Redis, JWT/Argon2
-**Commands**: `cargo build|run|test|fmt|clippy` (from backend/)
+**Commands**: `cargo fmt|clippy` (from backend/)
 **Structure**: `src/main.rs`, `src/handler/`, `src/model/`, `src/adapter/`
 
 **Code Style**:
@@ -46,7 +46,7 @@ Full-stack template: Rust backend + Next.js frontend.
 **Debugging**: `tilt logs <service-name>`
 
 **Database**: Create migrations in `backend/migrations/`, run `sqlx migrate run`
-**API Changes**: Edit `.proto` → `cargo build` → Update handlers
+**API Changes**: Edit `.proto` → `cargo check` → Update handlers
 
 **Testing**: `cargo test` (backend), Storybook (frontend)
 
