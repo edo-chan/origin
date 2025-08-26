@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16
     ports:
-      - "5433:5432"
+      - "5430:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -23,8 +23,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     ports:
-      - "50051:50051"
-      - "8081:8081"
+      - "49951:50051"
     restart: unless-stopped
     depends_on:
       postgres:
@@ -51,7 +50,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "49999:8080"
-      - "9901:9901"
     depends_on:
       - backend
     networks:
