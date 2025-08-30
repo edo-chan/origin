@@ -1,3 +1,0 @@
-config:
-  origin-infrastructure:domain: example.com
-  origin-infrastructure:environment: local

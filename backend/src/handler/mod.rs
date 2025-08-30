@@ -1,2 +1,2 @@
-pub mod greeter;
+pub mod accounts;
 pub mod auth;

@@ -66,7 +66,6 @@ pub struct AccessTokenClaims {
     pub sub: String,        // Subject (user ID)
     pub email: String,      // User email
     pub name: String,       // User display name
-    pub google_id: String,  // Google OAuth ID
     pub session_id: String, // Session ID for revocation
     pub iss: String,        // Issuer
     pub aud: String,        // Audience
@@ -109,8 +108,37 @@ pub struct JwtService {
 }
 
 impl JwtService {
-    /// Create a new JWT service
-    pub fn new(config: JwtConfig) -> Result<Self> {
+    /// Create a new JWT service with just a secret
+    pub fn new(secret: String) -> Self {
+        let config = JwtConfig {
+            secret: secret.clone(),
+            algorithm: Algorithm::HS256,
+            access_token_expiry: Duration::hours(1),
+            refresh_token_expiry: Duration::days(30),
+            issuer: "origin-backend".to_string(),
+            audience: "origin-frontend".to_string(),
+        };
+        
+        let encoding_key = EncodingKey::from_secret(config.secret.as_bytes());
+        let decoding_key = DecodingKey::from_secret(config.secret.as_bytes());
+        
+        let mut validation = Validation::new(config.algorithm);
+        validation.set_issuer(&[config.issuer.clone()]);
+        validation.set_audience(&[config.audience.clone()]);
+        validation.validate_exp = true;
+        validation.validate_nbf = false;
+        validation.leeway = 60;
+
+        Self {
+            config,
+            encoding_key,
+            decoding_key,
+            validation,
+        }
+    }
+
+    /// Create a new JWT service with config
+    pub fn with_config(config: JwtConfig) -> Result<Self> {
         let encoding_key = EncodingKey::from_secret(config.secret.as_bytes());
         let decoding_key = DecodingKey::from_secret(config.secret.as_bytes());
         
@@ -132,7 +160,57 @@ impl JwtService {
     /// Create JWT service from environment variables
     pub fn from_env() -> Result<Self> {
         let config = JwtConfig::from_env()?;
-        Self::new(config)
+        Self::with_config(config)
+    }
+
+    /// Generate simple access token for OTP auth
+    pub fn generate_access_token(&self, user_id: &str) -> Result<String> {
+        let now = Utc::now();
+        let expires_at = now + self.config.access_token_expiry;
+        
+        let claims = AccessTokenClaims {
+            sub: user_id.to_string(),
+            email: String::new(), // Will be filled from database
+            name: String::new(),
+            session_id: Uuid::new_v4().to_string(),
+            iss: self.config.issuer.clone(),
+            aud: self.config.audience.clone(),
+            iat: now.timestamp(),
+            exp: expires_at.timestamp(),
+            jti: Uuid::new_v4().to_string(),
+            token_type: "access".to_string(),
+        };
+
+        encode(
+            &Header::new(self.config.algorithm),
+            &claims,
+            &self.encoding_key,
+        )
+        .context("Failed to encode access token")
+    }
+
+    /// Generate simple refresh token for OTP auth
+    pub fn generate_refresh_token(&self, user_id: &str) -> Result<String> {
+        let now = Utc::now();
+        let expires_at = now + self.config.refresh_token_expiry;
+        
+        let claims = RefreshTokenClaims {
+            sub: user_id.to_string(),
+            session_id: Uuid::new_v4().to_string(),
+            iss: self.config.issuer.clone(),
+            aud: self.config.audience.clone(),
+            iat: now.timestamp(),
+            exp: expires_at.timestamp(),
+            jti: Uuid::new_v4().to_string(),
+            token_type: "refresh".to_string(),
+        };
+
+        encode(
+            &Header::new(self.config.algorithm),
+            &claims,
+            &self.encoding_key,
+        )
+        .context("Failed to encode refresh token")
     }
 
     /// Generate a token pair (access + refresh) for a user
@@ -142,7 +220,6 @@ impl JwtService {
         user_id: Uuid,
         email: &str,
         name: &str,
-        google_id: &str,
         session_id: Uuid,
     ) -> Result<TokenPair> {
         debug!("Generating JWT token pair");
@@ -156,7 +233,6 @@ impl JwtService {
             sub: user_id.to_string(),
             email: email.to_string(),
             name: name.to_string(),
-            google_id: google_id.to_string(),
             session_id: session_id.to_string(),
             iss: self.config.issuer.clone(),
             aud: self.config.audience.clone(),
@@ -268,7 +344,6 @@ impl JwtService {
         refresh_claims: &RefreshTokenClaims,
         email: &str,
         name: &str,
-        google_id: &str,
     ) -> Result<String> {
         debug!("Generating new access token from refresh token");
 
@@ -279,7 +354,6 @@ impl JwtService {
             sub: refresh_claims.sub.clone(),
             email: email.to_string(),
             name: name.to_string(),
-            google_id: google_id.to_string(),
             session_id: refresh_claims.session_id.clone(),
             iss: self.config.issuer.clone(),
             aud: self.config.audience.clone(),

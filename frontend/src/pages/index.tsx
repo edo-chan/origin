@@ -1,18 +1,48 @@
 import Head from 'next/head';
-import Link from 'next/link';
+import React, { useState } from 'react';
 import * as styles from '@/ui/styles/Home.css';
-import { GreeterExample } from '../domain/greeter';
 import { UserProfile, useAuth } from '@/domain/auth';
+import { PlaidLinkButton, AccountsList } from '@/domain/accounts';
 import { Stack } from '@/ui/components/Stack';
+import { Card } from '@/ui/components/Card';
+import { Text } from '@/ui/components/Text';
+import { Button } from '@/ui/components/Button';
+import Link from 'next/link';
+
+interface PlaidAccount {
+  account_id: string;
+  name: string;
+  official_name: string;
+  type: number;
+  subtype: number;
+  balance?: {
+    available?: number;
+    current?: number;
+    limit?: number;
+    iso_currency_code: string;
+  };
+  mask: string;
+}
 
 export default function Home() {
   const { isAuthenticated, user } = useAuth();
+  const [connectedAccounts, setConnectedAccounts] = useState<PlaidAccount[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePlaidSuccess = (accounts: PlaidAccount[]) => {
+    setConnectedAccounts(accounts);
+    setError(null);
+  };
+
+  const handlePlaidError = (errorMessage: string) => {
+    setError(errorMessage);
+  };
 
   return (
     <div className={styles.container}>
       <Head>
-        <title>Template Project</title>
-        <meta name="description" content="Template project with NextJS, React, Vanilla Extract, Rust, and gRPC with Google OAuth" />
+        <title>Account Manager</title>
+        <meta name="description" content="Connect and manage your bank accounts securely" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -27,77 +57,86 @@ export default function Home() {
           </div>
         )}
 
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          This is a template project with NextJS, React, Vanilla Extract, Rust, and gRPC
-          {isAuthenticated && <><br />Hello, {user?.name}! You&apos;re signed in.</>}
-        </p>
-
-        {!isAuthenticated && (
-          <Stack gap="md" style={{ marginBottom: '2rem' }}>
-            <Link href="/auth/otp" className={styles.card} style={{ 
-              display: 'inline-block', 
-              textDecoration: 'none',
-              textAlign: 'center',
-              padding: '1rem 2rem'
-            }}>
-              {"Sign In"}
-            </Link>
+        <Stack gap="lg" align="center" style={{ width: '100%', maxWidth: '800px' }}>
+          <Stack gap="md" align="center">
+            <h1 className={styles.title}>
+              Account Manager
+            </h1>
+            <Text size="lg" variant="secondary" style={{ textAlign: 'center' }}>
+              Connect your bank accounts securely and view your financial data in one place
+            </Text>
           </Stack>
-        )}
 
-        <GreeterExample />
+          {!isAuthenticated ? (
+            <Card style={{ 
+              padding: '2rem', 
+              textAlign: 'center',
+              maxWidth: '400px',
+              width: '100%'
+            }}>
+              <Stack gap="md">
+                <Text as="h3" size="lg" weight="semibold">Welcome!</Text>
+                <Text variant="secondary">
+                  Sign in to connect your bank accounts and start managing your finances.
+                </Text>
+                <Link href="/auth/otp">
+                  <Button variant="primary" size="lg">
+                    Sign In to Get Started
+                  </Button>
+                </Link>
+              </Stack>
+            </Card>
+          ) : (
+            <Stack gap="lg" align="center" style={{ width: '100%' }}>
+              <Card style={{ 
+                padding: '2rem', 
+                textAlign: 'center',
+                width: '100%',
+                maxWidth: '500px'
+              }}>
+                <Stack gap="md">
+                  <Text as="h3" size="lg" weight="semibold">
+                    Welcome back, {user?.name?.split(' ')[0] || 'User'}!
+                  </Text>
+                  <Text variant="secondary">
+                    Connect your bank accounts to view balances and transactions.
+                  </Text>
+                  <PlaidLinkButton
+                    onSuccess={handlePlaidSuccess}
+                    onError={handlePlaidError}
+                  />
+                  {error && (
+                    <Text variant="danger">
+                      {error}
+                    </Text>
+                  )}
+                </Stack>
+              </Card>
 
-        <div className={styles.grid}>
-          <Link href="/auth/otp" className={styles.card}>
-            <h2 className={styles.cardTitle}>Sign In &rarr;</h2>
-            <p className={styles.cardText}>Sign in with email or Google OAuth.</p>
-          </Link>
+              <AccountsList accounts={connectedAccounts} />
+            </Stack>
+          )}
 
-          <Link href="/dashboard" className={styles.card}>
-            <h2 className={styles.cardTitle}>Dashboard &rarr;</h2>
-            <p className={styles.cardText}>Go to the protected dashboard page.</p>
-          </Link>
-
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2 className={styles.cardTitle}>NextJS &rarr;</h2>
-            <p className={styles.cardText}>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://reactjs.org" className={styles.card}>
-            <h2 className={styles.cardTitle}>React &rarr;</h2>
-            <p className={styles.cardText}>Learn about React, the JavaScript library for building user interfaces.</p>
-          </a>
-
-          <a href="https://vanilla-extract.style" className={styles.card}>
-            <h2 className={styles.cardTitle}>Vanilla Extract &rarr;</h2>
-            <p className={styles.cardText}>Discover the zero-runtime CSS-in-JS library with TypeScript support.</p>
-          </a>
-
-          <a href="https://www.rust-lang.org" className={styles.card}>
-            <h2 className={styles.cardTitle}>Rust &rarr;</h2>
-            <p className={styles.cardText}>Explore Rust, a language empowering everyone to build reliable and efficient software.</p>
-          </a>
-
-          <a href="https://grpc.io" className={styles.card}>
-            <h2 className={styles.cardTitle}>gRPC &rarr;</h2>
-            <p className={styles.cardText}>Learn about gRPC, a high-performance, open-source universal RPC framework.</p>
-          </a>
-        </div>
+          {/* Quick navigation for authenticated users */}
+          {isAuthenticated && (
+            <div className={styles.grid} style={{ marginTop: '2rem' }}>
+              <Link href="/dashboard" className={styles.card}>
+                <h2 className={styles.cardTitle}>Dashboard &rarr;</h2>
+                <p className={styles.cardText}>View your complete financial overview</p>
+              </Link>
+              <Card className={styles.card} style={{ opacity: 0.6, cursor: 'not-allowed' }}>
+                <h2 className={styles.cardTitle}>Transactions</h2>
+                <p className={styles.cardText}>Coming soon - View transaction history</p>
+              </Card>
+            </div>
+          )}
+        </Stack>
       </main>
 
       <footer className={styles.footer}>
-        <a
-          href="https://github.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.footerLink}
-        >
-          Template Project
-        </a>
+        <Text size="xs" variant="secondary">
+          Account Manager - Secure Financial Management
+        </Text>
       </footer>
     </div>
   );

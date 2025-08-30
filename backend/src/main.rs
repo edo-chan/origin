@@ -1,20 +1,16 @@
 use std::env;
+use std::sync::Arc;
 use tonic::transport::Server;
 use dotenv::dotenv;
 use tower_http::cors::{CorsLayer, Any};
 use tower::ServiceBuilder;
 use tracing::{info, error, instrument};
+use sqlx::postgres::PgPoolOptions;
 
-use sqlx::PgPool;
-use template::handler::greeter::GreeterHandler;
-use template::handler::auth::AuthServiceImpl;
-use template::model::greeting::GreetingRepository;
-use template::model::user::UserRepository;
-use template::model::auth::{JwtManager, SessionManager};
-use template::model::otp::OtpRepository;
-use template::adapter::google_oauth::GoogleOAuthClient;
-use template::adapter::AppConfig;
-use template::gen::greeter::greeter_service_server::GreeterServiceServer;
+use template::adapter::{jwt_service::JwtService, otp::OtpManager, otp_service::OtpService, ses::SESClient, ses::SESConfig, parameter_store::ParameterStore};
+use template::handler::accounts::AccountsHandler;
+use template::handler::auth::AuthHandler;
+use template::gen::accounts::accounts_service_server::AccountsServiceServer;
 use template::gen::auth::auth_service_server::AuthServiceServer;
 use template::logging;
 
@@ -27,69 +23,70 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Load environment variables from .env file if it exists (for local development)
     dotenv().ok();
 
-    // Load configuration from Parameter Store (falls back to env vars for local dev)
-    info!("Loading application configuration...");
-    let config = AppConfig::load().await;
-    info!("Configuration loaded successfully");
+    // Get environment
+    let environment = env::var("ENVIRONMENT").unwrap_or_else(|_| "local".to_string());
+    let aws_region = env::var("AWS_REGION").unwrap_or_else(|_| "us-east-1".to_string());
+
+    info!("Starting server in {} environment", environment);
+
+    // Initialize Parameter Store
+    let parameter_store = Arc::new(ParameterStore::new(&aws_region).await?);
+
+    // Get configuration from Parameter Store
+    let database_url = if environment == "local" {
+        env::var("DATABASE_URL").unwrap_or_else(|_| "postgresql://postgres:postgres@localhost:5432/origin".to_string())
+    } else {
+        parameter_store.get(&format!("/origin/{}/database-url", environment)).await?
+    };
+
+    let jwt_secret = if environment == "local" {
+        env::var("JWT_SECRET").unwrap_or_else(|_| "local-development-secret-key-change-in-production".to_string())
+    } else {
+        parameter_store.get(&format!("/origin/{}/jwt-secret", environment)).await?
+    };
+
+    // Initialize database pool
+    let pool = Arc::new(
+        PgPoolOptions::new()
+            .max_connections(5)
+            .connect(&database_url)
+            .await?
+    );
+
+    info!("Database connection established");
+
+    // Run migrations
+    sqlx::migrate!("./migrations")
+        .run(&*pool)
+        .await?;
+
+    info!("Database migrations completed");
+
+    // Initialize services
+    let jwt_service = Arc::new(JwtService::new(jwt_secret));
+    
+    // Initialize SES client
+    let ses_config = SESConfig {
+        region: aws_region.clone(),
+        default_sender: env::var("SES_SENDER").unwrap_or_else(|_| "noreply@example.com".to_string()),
+        default_sender_name: Some("Origin".to_string()),
+        reply_to: None,
+        configuration_set: None,
+    };
+    let ses_client = SESClient::new(ses_config).await?;
+    
+    // Initialize OTP service
+    let otp_manager = OtpManager::new();
+    let otp_service = Arc::new(OtpService::new(otp_manager, ses_client));
 
     // Get server address from environment variable or use default
     let grpc_addr = env::var("GRPC_ADDR")
         .unwrap_or_else(|_| "[::0]:50051".to_string())
         .parse()?;
 
-    info!("Connecting to database...");
-    let pool = PgPool::connect(&config.database_url).await?;
-    info!("Database connection established");
-
-    // Create the greeter handler with repository access
-    let greeting_repo = GreetingRepository::new(pool.clone());
-    let greeter = GreeterHandler::new(greeting_repo);
-
-    // Create auth service dependencies
-    let oauth_client = GoogleOAuthClient::from_env()
-        .map_err(|e| {
-            error!("Failed to create OAuth client: {}", e);
-            e
-        })?;
-    
-    // Create JWT manager with config from Parameter Store
-    let jwt_config = template::model::auth::JwtConfig {
-        secret_key: config.jwt_secret.clone(),
-        issuer: env::var("JWT_ISSUER").unwrap_or_else(|_| "auth-service".to_string()),
-        audience: env::var("JWT_AUDIENCE").unwrap_or_else(|_| "api".to_string()),
-        access_token_expires_minutes: env::var("JWT_ACCESS_TOKEN_EXPIRES_MINUTES")
-            .unwrap_or_else(|_| "15".to_string())
-            .parse()
-            .unwrap_or(15),
-        refresh_token_expires_days: env::var("JWT_REFRESH_TOKEN_EXPIRES_DAYS")
-            .unwrap_or_else(|_| "30".to_string())
-            .parse()
-            .unwrap_or(30),
-    };
-    let jwt_manager = JwtManager::new(jwt_config);
-    
-    // Create session manager with Redis URL from Parameter Store
-    let session_ttl_hours = env::var("SESSION_TTL_HOURS")
-        .unwrap_or_else(|_| "24".to_string())
-        .parse()
-        .unwrap_or(24);
-    let session_manager = SessionManager::new(&config.redis_url, session_ttl_hours)
-        .map_err(|e| {
-            error!("Failed to create session manager: {}", e);
-            e
-        })?;
-    
-    let user_repository = UserRepository::new(pool.clone());
-    let otp_repository = OtpRepository::new(pool.clone());
-    
-    // Create the auth service handler
-    let auth_service = AuthServiceImpl::new(
-        oauth_client,
-        jwt_manager,
-        session_manager,
-        user_repository,
-        otp_repository,
-    );
+    // Create handlers
+    let accounts_handler = AccountsHandler::new();
+    let auth_handler = AuthHandler::new(pool.clone(), otp_service, jwt_service);
 
     // Configure CORS middleware
     let cors = CorsLayer::new()
@@ -100,8 +97,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Build and run the gRPC server
     let grpc_server = Server::builder()
         .layer(ServiceBuilder::new().layer(cors))
-        .add_service(GreeterServiceServer::new(greeter))
-        .add_service(AuthServiceServer::new(auth_service))
+        .add_service(AccountsServiceServer::new(accounts_handler))
+        .add_service(AuthServiceServer::new(auth_handler))
         .serve(grpc_addr);
 
     info!("gRPC server listening on {}", grpc_addr);

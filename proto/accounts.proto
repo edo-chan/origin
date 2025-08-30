@@ -1,0 +1,106 @@
+syntax = "proto3";
+package accounts;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// Accounts service definition
+service AccountsService {
+  // Create Plaid link token for account connection
+  rpc CreatePlaidLinkToken (CreatePlaidLinkTokenRequest) returns (CreatePlaidLinkTokenResponse) {
+    option (google.api.http) = {
+      post: "/api/accounts/plaid/link-token"
+      body: "*"
+    };
+  }
+
+  // Exchange Plaid public token for access token
+  rpc ExchangePlaidPublicToken (ExchangePlaidPublicTokenRequest) returns (ExchangePlaidPublicTokenResponse) {
+    option (google.api.http) = {
+      post: "/api/accounts/plaid/exchange-token"
+      body: "*"
+    };
+  }
+}
+
+// Create Plaid link token request
+message CreatePlaidLinkTokenRequest {
+  string user_id = 1;                // User ID for context
+  optional string client_name = 2;   // Name shown in Plaid Link
+  repeated string country_codes = 3; // Supported country codes (e.g., ["US"])
+  string language = 4;               // Language code (e.g., "en")
+  repeated PlaidProduct products = 5; // Plaid products to enable
+  optional string webhook_url = 6;   // Webhook URL for updates
+}
+
+// Create Plaid link token response
+message CreatePlaidLinkTokenResponse {
+  string link_token = 1;             // Link token for Plaid Link
+  int64 expires_at = 2;              // Token expiration timestamp
+}
+
+// Exchange Plaid public token request  
+message ExchangePlaidPublicTokenRequest {
+  string public_token = 1;           // Public token from Plaid Link
+  string user_id = 2;                // User ID for context
+  optional string institution_name = 3; // Institution name for reference
+}
+
+// Exchange Plaid public token response
+message ExchangePlaidPublicTokenResponse {
+  string item_id = 1;                // Plaid item ID
+  repeated PlaidAccount accounts = 2; // Connected accounts
+  bool success = 3;                  // Whether exchange was successful
+  string message = 4;                // Success/error message
+}
+
+// Plaid product enumeration
+enum PlaidProduct {
+  PLAID_PRODUCT_UNSPECIFIED = 0;
+  PLAID_PRODUCT_TRANSACTIONS = 1;
+  PLAID_PRODUCT_ACCOUNTS = 2;
+  PLAID_PRODUCT_IDENTITY = 3;
+  PLAID_PRODUCT_ASSETS = 4;
+  PLAID_PRODUCT_LIABILITIES = 5;
+  PLAID_PRODUCT_INVESTMENTS = 6;
+}
+
+// Plaid account information
+message PlaidAccount {
+  string account_id = 1;             // Plaid account ID
+  string name = 2;                   // Account name
+  string official_name = 3;          // Official account name
+  PlaidAccountType type = 4;         // Account type
+  PlaidAccountSubtype subtype = 5;   // Account subtype
+  PlaidBalance balance = 6;          // Account balance
+  string mask = 7;                   // Account number mask
+}
+
+// Plaid account type enumeration
+enum PlaidAccountType {
+  PLAID_ACCOUNT_TYPE_UNSPECIFIED = 0;
+  PLAID_ACCOUNT_TYPE_DEPOSITORY = 1;
+  PLAID_ACCOUNT_TYPE_CREDIT = 2;
+  PLAID_ACCOUNT_TYPE_LOAN = 3;
+  PLAID_ACCOUNT_TYPE_INVESTMENT = 4;
+  PLAID_ACCOUNT_TYPE_OTHER = 5;
+}
+
+// Plaid account subtype enumeration
+enum PlaidAccountSubtype {
+  PLAID_ACCOUNT_SUBTYPE_UNSPECIFIED = 0;
+  PLAID_ACCOUNT_SUBTYPE_CHECKING = 1;
+  PLAID_ACCOUNT_SUBTYPE_SAVINGS = 2;
+  PLAID_ACCOUNT_SUBTYPE_CREDIT_CARD = 3;
+  PLAID_ACCOUNT_SUBTYPE_MORTGAGE = 4;
+  PLAID_ACCOUNT_SUBTYPE_AUTO = 5;
+  PLAID_ACCOUNT_SUBTYPE_STUDENT = 6;
+}
+
+// Plaid balance information
+message PlaidBalance {
+  optional double available = 1;     // Available balance
+  optional double current = 2;       // Current balance
+  optional double limit = 3;         // Credit limit (if applicable)
+  string iso_currency_code = 4;      // ISO currency code
+}

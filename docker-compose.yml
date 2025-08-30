@@ -29,16 +29,11 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      # Minimal configuration for local development
+      # Production values are loaded from AWS Parameter Store
       - ENVIRONMENT=local
-      - GRPC_ADDR=[::0]:50051
-      - HTTP_ADDR=[::0]:8081
-      - RUST_LOG=info
-      - GOOGLE_OAUTH_CLIENT_ID=1002179668712-3uplblsht9v1h7tds5o666v3bprsbm3t.apps.googleusercontent.com
-      - GOOGLE_OAUTH_CLIENT_SECRET=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
-      # Fallback values for local development (Parameter Store preferred)
-      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/template
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=oiKSa/assPDgureWiHlywfRZJHQ1pDByzcpJyTeiqK1A/IOPTgCsBuYjWhKw9kOp/t8/4gudodkB1lzY4Ve9qg==
+      - AWS_REGION=us-east-1
+      - SERVICE_NAME=backend
     networks:
       - app-network
 
@@ -62,6 +57,7 @@ services:
       - "3000:3000"
     restart: unless-stopped
     environment:
+      # Frontend only needs the backend URL for API calls
       - NEXT_PUBLIC_BACKEND_URL=http://envoy:8080
     networks:
       - app-network
@@ -79,8 +75,6 @@ services:
       - ./frontend/package.json:/app/package.json
       - ./frontend/.storybook:/app/.storybook
     restart: unless-stopped
-    environment:
-      - NODE_ENV=development
     networks:
       - app-network
 

@@ -1,3 +1,0 @@
-name: origin-infrastructure
-runtime: go
-description: AWS infrastructure for Origin full-stack template

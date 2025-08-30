@@ -2,273 +2,102 @@ syntax = "proto3";
 package auth;
 
 import "google/api/annotations.proto";
-import "google/protobuf/timestamp.proto";
 
-// Authentication service definition
+// Authentication service definition - OTP only
 service AuthService {
-  // Initiate Google OAuth flow
-  rpc InitiateGoogleOAuth (InitiateOAuthRequest) returns (InitiateOAuthResponse) {
+  // Request an OTP for login
+  rpc RequestOtp(RequestOtpRequest) returns (RequestOtpResponse) {
     option (google.api.http) = {
-      post: "/api/auth/oauth/google/initiate"
+      post: "/v1/auth/request-otp"
       body: "*"
     };
   }
 
-  // Complete Google OAuth flow (callback handler)
-  rpc CompleteGoogleOAuth (CompleteOAuthRequest) returns (CompleteOAuthResponse) {
+  // Verify OTP and get tokens
+  rpc VerifyOtp(VerifyOtpRequest) returns (AuthResponse) {
     option (google.api.http) = {
-      post: "/api/auth/oauth/google/complete"
+      post: "/v1/auth/verify-otp"
       body: "*"
     };
   }
 
-  // Refresh access token using refresh token
-  rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
+  // Refresh access token
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse) {
     option (google.api.http) = {
-      post: "/api/auth/refresh"
+      post: "/v1/auth/refresh"
       body: "*"
     };
   }
 
-  // Logout (invalidate session)
-  rpc Logout (LogoutRequest) returns (LogoutResponse) {
+  // Logout user
+  rpc LogoutUser(LogoutRequest) returns (LogoutResponse) {
     option (google.api.http) = {
-      post: "/api/auth/logout"
+      post: "/v1/auth/logout"
       body: "*"
     };
   }
 
-  // Logout from all devices
-  rpc LogoutAll (LogoutAllRequest) returns (LogoutAllResponse) {
+  // Get current user info
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (UserResponse) {
     option (google.api.http) = {
-      post: "/api/auth/logout-all"
-      body: "*"
-    };
-  }
-
-  // Validate access token (for middleware)
-  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse) {
-    option (google.api.http) = {
-      post: "/api/auth/validate"
-      body: "*"
-    };
-  }
-
-  // Get user profile
-  rpc GetProfile (GetProfileRequest) returns (GetProfileResponse) {
-    option (google.api.http) = {
-      get: "/api/auth/profile"
-    };
-  }
-
-  // Get user sessions (for security dashboard)
-  rpc GetUserSessions (GetUserSessionsRequest) returns (GetUserSessionsResponse) {
-    option (google.api.http) = {
-      get: "/api/auth/sessions"
-    };
-  }
-
-  // Revoke specific session
-  rpc RevokeSession (RevokeSessionRequest) returns (RevokeSessionResponse) {
-    option (google.api.http) = {
-      post: "/api/auth/sessions/{session_id}/revoke"
-      body: "*"
-    };
-  }
-
-  // Send OTP to email
-  rpc SendOtp (SendOtpRequest) returns (SendOtpResponse) {
-    option (google.api.http) = {
-      post: "/api/auth/otp/send"
-      body: "*"
-    };
-  }
-
-  // Verify OTP and login
-  rpc VerifyOtp (VerifyOtpRequest) returns (VerifyOtpResponse) {
-    option (google.api.http) = {
-      post: "/api/auth/otp/verify"
-      body: "*"
+      get: "/v1/auth/me"
     };
   }
 }
 
-// Request to initiate OAuth flow
-message InitiateOAuthRequest {
-  optional string redirect_uri = 1;  // Optional custom redirect URI
-  optional string device_name = 2;   // Device identification
+// Request OTP for email
+message RequestOtpRequest {
+  string email = 1;
 }
 
-// Response with OAuth authorization URL
-message InitiateOAuthResponse {
-  string auth_url = 1;               // Google OAuth authorization URL
-  string state_token = 2;            // State token for CSRF protection
-  int64 expires_at = 3;              // State expiration timestamp
+message RequestOtpResponse {
+  bool success = 1;
+  string message = 2;
 }
 
-// Request to complete OAuth flow
-message CompleteOAuthRequest {
-  string code = 1;                   // Authorization code from Google
-  string state = 2;                  // State parameter for CSRF validation
-  optional string device_info = 3;   // JSON string with device information
-  optional string ip_address = 4;    // Client IP address
-  optional string user_agent = 5;    // User agent string
-}
-
-// Response with JWT tokens
-message CompleteOAuthResponse {
-  string access_token = 1;           // JWT access token
-  string refresh_token = 2;          // JWT refresh token
-  int64 access_token_expires_at = 3; // Access token expiration
-  int64 refresh_token_expires_at = 4;// Refresh token expiration
-  string token_type = 5;             // "Bearer"
-  UserProfile user = 6;              // User profile information
-  bool is_new_user = 7;              // Whether this is a newly created user
-}
-
-// Request to refresh access token
-message RefreshTokenRequest {
-  string refresh_token = 1;          // Current refresh token
-}
-
-// Response with new access token
-message RefreshTokenResponse {
-  string access_token = 1;           // New JWT access token
-  int64 access_token_expires_at = 2; // New access token expiration
-  string token_type = 3;             // "Bearer"
-}
-
-// Request to logout
-message LogoutRequest {
-  string access_token = 1;           // Current access token
-}
-
-// Response for logout
-message LogoutResponse {
-  bool success = 1;                  // Whether logout was successful
-  string message = 2;                // Success/error message
-}
-
-// Request to logout from all devices
-message LogoutAllRequest {
-  string access_token = 1;           // Current access token
-}
-
-// Response for logout all
-message LogoutAllResponse {
-  bool success = 1;                  // Whether logout was successful
-  int32 revoked_sessions = 2;        // Number of sessions revoked
-  string message = 3;                // Success/error message
-}
-
-// Request to validate token
-message ValidateTokenRequest {
-  string access_token = 1;           // Access token to validate
-}
-
-// Response with token validation result
-message ValidateTokenResponse {
-  bool valid = 1;                    // Whether token is valid
-  UserProfile user = 2;              // User profile if valid
-  string session_id = 3;             // Session ID if valid
-  int64 expires_at = 4;              // Token expiration if valid
-}
-
-// Request to get user profile
-message GetProfileRequest {
-  string access_token = 1;           // Access token
-}
-
-// Response with user profile
-message GetProfileResponse {
-  UserProfile user = 1;              // User profile information
-}
-
-// Request to get user sessions
-message GetUserSessionsRequest {
-  string access_token = 1;           // Access token
-}
-
-// Response with user sessions
-message GetUserSessionsResponse {
-  repeated UserSession sessions = 1;  // List of active sessions
-}
-
-// Request to revoke a specific session
-message RevokeSessionRequest {
-  string access_token = 1;           // Access token
-  string session_id = 2;             // Session ID to revoke
-  optional string reason = 3;        // Reason for revocation
-}
-
-// Response for session revocation
-message RevokeSessionResponse {
-  bool success = 1;                  // Whether revocation was successful
-  string message = 2;                // Success/error message
-}
-
-// User profile information
-message UserProfile {
-  string id = 1;                     // User UUID
-  string google_id = 2;              // Google OAuth ID
-  string email = 3;                  // User email
-  string name = 4;                   // Display name
-  optional string given_name = 5;    // First name
-  optional string family_name = 6;   // Last name
-  optional string picture_url = 7;   // Profile picture URL
-  optional string locale = 8;        // User locale
-  bool is_active = 9;                // Whether account is active
-  bool is_verified = 10;             // Whether account is verified
-  int64 created_at = 11;             // Account creation timestamp (Unix timestamp)
-  int64 updated_at = 12;             // Last update timestamp (Unix timestamp)
-  optional int64 last_login_at = 13; // Last login timestamp (Unix timestamp)
-  string preferences = 14;           // JSON string with user preferences
-}
-
-// User session information
-message UserSession {
-  string id = 1;                     // Session UUID
-  string device_info = 2;            // JSON string with device information
-  optional string ip_address = 3;    // IP address
-  optional string user_agent = 4;    // User agent string
-  int64 created_at = 5;              // Session creation timestamp (Unix timestamp)
-  int64 last_activity_at = 6;        // Last activity timestamp (Unix timestamp)
-  int64 expires_at = 7;              // Session expiration timestamp (Unix timestamp)
-  bool is_current = 8;               // Whether this is the current session
-}
-
-// Request to send OTP to email
-message SendOtpRequest {
-  string email = 1;                  // Email address to send OTP to
-}
-
-// Response for sending OTP
-message SendOtpResponse {
-  bool success = 1;                  // Whether OTP was sent successfully
-  string message = 2;                // Success/error message
-  int64 expires_at = 3;              // OTP expiration timestamp
-  int32 attempts_allowed = 4;        // Number of verification attempts allowed
-}
-
-// Request to verify OTP
+// Verify OTP code
 message VerifyOtpRequest {
-  string email = 1;                  // Email address
-  string code = 2;                   // OTP code to verify
-  optional string device_info = 3;   // JSON string with device information
-  optional string ip_address = 4;    // Client IP address
-  optional string user_agent = 5;    // User agent string
+  string email = 1;
+  string code = 2;
 }
 
-// Response for OTP verification
-message VerifyOtpResponse {
-  bool success = 1;                  // Whether verification was successful
-  string message = 2;                // Success/error message
-  optional string access_token = 3;  // JWT access token (if successful)
-  optional string refresh_token = 4; // JWT refresh token (if successful)
-  optional int64 access_token_expires_at = 5; // Access token expiration
-  optional int64 refresh_token_expires_at = 6; // Refresh token expiration
-  optional string token_type = 7;    // "Bearer" (if successful)
-  optional UserProfile user = 8;     // User profile information (if successful)
-  bool is_new_user = 9;              // Whether this is a newly created user
-  int32 attempts_remaining = 10;     // Remaining verification attempts
+// Refresh token request
+message RefreshTokenRequest {
+  string refresh_token = 1;
 }
+
+// Logout request
+message LogoutRequest {
+  string access_token = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Get current user request
+message GetCurrentUserRequest {
+  string access_token = 1;
+}
+
+// Authentication response with tokens
+message AuthResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  User user = 3;
+}
+
+// User response
+message UserResponse {
+  User user = 1;
+}
+
+// User model
+message User {
+  string id = 1;
+  string email = 2;
+  string full_name = 3;
+  string created_at = 4; // ISO 8601 timestamp string
+}
+
